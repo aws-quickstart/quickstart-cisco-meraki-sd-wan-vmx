@@ -1,0 +1,18 @@
+global:
+  owner: tonynv@amazon.com
+  qsname: qs-workshop
+  regions:
+    - ap-southeast-1
+    - ap-southeast-2
+    - eu-central-1
+    - eu-west-1
+    - us-east-1
+    - us-west-1
+    - us-west-2
+  reporting: true
+tests:
+  lab-master-vpc:
+    parameter_input: workshop_input.json 
+    template_file: master.template.yaml
+    regions:
+      - us-west-2
