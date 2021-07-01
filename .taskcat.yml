@@ -1,0 +1,20 @@
+project:
+  name: quickstart-cisco-meraki-sd-wan-vmx
+  regions:
+  - us-east-1
+tests:
+  default:
+    template: ./templates/master.template.yaml
+    regions:
+    - us-east-1
+    parameters:
+      AvailabilityZones: "$[taskcat_getaz_2]"
+      EmailAddress: simarbir.singh@meraki.net
+      KeyPairName: simar-qs-useast-1
+      QSS3KeyPrefix: "quickstart-cisco-meraki-sd-wan-vmx/"
+      QSS3BucketRegion: "$[taskcat_current_region]"
+      QSS3BucketName: "$[taskcat_autobucket]"
+      vMXToken1: "86403fe48706230b3226f15261d4f056/d4cc20b73b9cedf49c0261b000387188e908c3ea76db091e4e99f6d32e9920ace5452ed119c19cd597052c9c4be0d753bb89e428dfb0b1451928155f544f6021/fde16e36834b0d3a4b746b985563e065cd6cc24092d4cf61b5d8e268d5442ef5"
+      vMXToken2: "643d23be1f31d79c6c40829b5f397236/a41b1e2a017572ecada4e112775418f7cec305c1f2068d1a7dcc455c844daebb70f82bba11649a00caa1e7972184e3b79ea09116b5d0f790a86da2b1ed69c822/2b1c8cd6afd7b8e99438c1a103e9b85802fb64545ee740bef333223333f2188d"
+      AmazonSideASN: 65512
+      InstanceType: c5.xlarge

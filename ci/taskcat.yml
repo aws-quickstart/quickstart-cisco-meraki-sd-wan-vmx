@@ -1,18 +1,12 @@
 global:
-  owner: tonynv@amazon.com
-  qsname: qs-workshop
+  owner: simarbsi@cisco.com
+  qsname: quickstart-cisco-meraki-sd-wan-vmx
   regions:
-    - ap-southeast-1
-    - ap-southeast-2
-    - eu-central-1
-    - eu-west-1
     - us-east-1
-    - us-west-1
-    - us-west-2
   reporting: true
 tests:
-  lab-master-vpc:
-    parameter_input: workshop_input.json 
+  default:
+    parameter_input: meraki_vmx_input.json 
     template_file: master.template.yaml
     regions:
-      - us-west-2
+      - us-east-1

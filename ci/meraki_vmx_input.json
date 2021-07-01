@@ -1,0 +1,38 @@
+[
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_getaz_2]"
+    },
+    {
+        "ParameterKey": "EmailAddress",
+        "ParameterValue": "simarbir.singh@meraki.net"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "simar-qs-useast-1"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-cisco-meraki-sd-wan-vmx/"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "$[taskcat_autobucket]"
+    },
+    {
+        "ParameterKey": "QSS3BucketRegion",
+        "ParameterValue": "$[taskcat_current_region]"
+    },
+    {
+        "ParameterKey": "vMXToken1",
+        "ParameterValue": "override_this_with_token_from_dashboard"
+    },
+    {
+        "ParameterKey": "vMXToken2",
+        "ParameterValue": "override_this_with_token_from_dashboard"
+    },
+    {
+        "ParameterKey": "AmazonSideASN",
+        "ParameterValue": "65512"
+    }
+]
