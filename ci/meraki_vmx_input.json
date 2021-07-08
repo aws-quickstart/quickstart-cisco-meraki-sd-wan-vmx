@@ -24,11 +24,11 @@
         "ParameterValue": "$[taskcat_current_region]"
     },
     {
-        "ParameterKey": "vMXToken1",
+        "ParameterKey": "vMX1Token",
         "ParameterValue": "override_this_with_token_from_dashboard"
     },
     {
-        "ParameterKey": "vMXToken2",
+        "ParameterKey": "vMX2Token",
         "ParameterValue": "override_this_with_token_from_dashboard"
     },
     {

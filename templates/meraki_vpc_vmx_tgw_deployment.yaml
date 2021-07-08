@@ -20,10 +20,10 @@ Parameters:
       - m4.large
     ConstraintDescription: must be a valid EC2 instance type.
 
-  vMXToken1:
+  vMX1Token:
     Description: Onboarding token to be used for the vMX-1
     Type: String
-  vMXToken2:
+  vMX2Token:
     Description: Onboarding token to be used for the vMX-2
     Type: String
 
@@ -134,10 +134,10 @@ Resources:
           Ref: QSS3BucketRegion
         QSS3KeyPrefix:
           Ref: QSS3KeyPrefix
-        vMXToken1:
-          Ref: vMXToken1 
-        vMXToken2:
-          Ref: vMXToken2
+        vMX1Token:
+          Ref: vMX1Token
+        vMX2Token:
+          Ref: vMX2Token
         VPCID:
           Fn::GetAtt:
           - VPCStack
@@ -173,6 +173,8 @@ Resources:
           Fn::GetAtt:
           - VPCStack
           - Outputs.VPCID
+        AmazonSideASN:
+          Ref: AmazonSideASN
 Outputs:
   VPCID:
     Description: "The ID of the deployed VPC"
@@ -197,4 +199,4 @@ Outputs:
     Value:
       Fn::GetAtt:
       - TGWStack
-      - Outputs.vMX2InstanceID
+      - Outputs.TransitGatewayID

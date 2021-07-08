@@ -47,11 +47,11 @@ Parameters:
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
   
-  vMXToken1:
+  vMX1Token:
     Description: Onboarding token to be used for the vMX-1
     Type: String
 
-  vMXToken2:
+  vMX2Token:
     Description: Onboarding token to be used for the vMX-2
     Type: String
 
@@ -99,7 +99,7 @@ Mappings:
       AMI: ami-044eae2d8e3fb2188
 
 Resources:
-  vMXInstance1:
+  vMX1Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !FindInMap
@@ -114,8 +114,8 @@ Resources:
           DeviceIndex: '0'
           SubnetId: !Ref 'AvailabilityZone1SubnetID'
       UserData:
-        Fn::Base64: !Ref 'vMXToken1'
-  vMXInstance2:
+        Fn::Base64: !Ref 'vMX1Token'
+  vMX2Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !FindInMap
@@ -130,11 +130,11 @@ Resources:
           DeviceIndex: '0'
           SubnetId: !Ref 'AvailabilityZone2SubnetID'
       UserData:
-        Fn::Base64: !Ref 'vMXToken2'
+        Fn::Base64: !Ref 'vMX2Token'
 
 Outputs:
   vMX1InstanceID:
-    Value: !Ref 'vMXInstance1'
+    Value: !Ref 'vMX1Instance'
   vMX2InstanceID:
-    Value: !Ref 'vMXInstance2'
+    Value: !Ref 'vMX2Instance'
 
