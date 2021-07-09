@@ -1,7 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  This template deploys two vMX instances in different avalaibility zones along with a new SDWAN VPC and a Transit Gateway.
+Description: This template deploys two vMX instances in different avalaibility zones along with a new SDWAN VPC and a Transit Gateway.
 
 Parameters:
   AvailabilityZones:

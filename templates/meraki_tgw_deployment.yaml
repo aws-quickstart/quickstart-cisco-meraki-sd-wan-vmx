@@ -3,10 +3,6 @@ Description: >-
    This template deploys a transit gateway in a VPC and creates a TGW attachment to the avalaible subnets in the VPC.
 Parameters:
 
-  KeyPairName:
-    Description: Amazon EC2 Key Pair
-    Type: 'AWS::EC2::KeyPair::KeyName'
-
   VPCID:
     Description: 'ID of the VPC (e.g., vpc-0343606e)'
     Type: 'AWS::EC2::VPC::Id'
@@ -18,26 +14,7 @@ Parameters:
   AvailabilityZone2SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-2 in Availability Zone 2
     Type: 'AWS::EC2::Subnet::Id'
-  
-  QSS3BucketName:
-    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: quickstart-cisco-meraki-sd-wan-vmx
-    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Type: String
 
-  QSS3BucketRegion:
-    Default: 'us-east-1'
-    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
-    Type: String
-
-  QSS3KeyPrefix:
-    AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: implementing/
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Type: String
-  
   AmazonSideASN:
     Description: ASN to be used for the Amazon TGW
     Type: String
