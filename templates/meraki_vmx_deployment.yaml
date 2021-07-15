@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-   This template deploys two meraki vMX appliances in a VPC in different avalaibility zones.
+   This template deploys two meraki vMX appliances in a VPC in different avalaibility zones. (qs-1s3afc2ta)
 Parameters:
   InstanceType:
     Description: EC2 instance type

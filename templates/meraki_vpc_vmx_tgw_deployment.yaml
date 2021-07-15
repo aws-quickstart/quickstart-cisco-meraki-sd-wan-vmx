@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template deploys two vMX instances in different avalaibility zones along with a new SDWAN VPC and a Transit Gateway.
+Description: This template deploys two vMX instances in different avalaibility zones along with a new SDWAN VPC and a Transit Gateway. (qs-1s3afc2ri)
 
 Parameters:
   AvailabilityZones:
@@ -127,12 +127,6 @@ Resources:
           Fn::GetAtt:
           - VPCStack
           - Outputs.PublicSubnet2ID
-        QSS3BucketName:
-          Ref: QSS3BucketName
-        QSS3BucketRegion:
-          Ref: QSS3BucketRegion
-        QSS3KeyPrefix:
-          Ref: QSS3KeyPrefix
         vMX1Token:
           Ref: vMX1Token
         vMX2Token:
@@ -152,8 +146,6 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        KeyPairName:
-          Ref: KeyPairName
         AvailabilityZone1SubnetID:
           Fn::GetAtt:
           - VPCStack
@@ -162,12 +154,6 @@ Resources:
           Fn::GetAtt:
           - VPCStack
           - Outputs.PublicSubnet2ID
-        QSS3BucketName:
-          Ref: QSS3BucketName
-        QSS3BucketRegion:
-          Ref: QSS3BucketRegion
-        QSS3KeyPrefix:
-          Ref: QSS3KeyPrefix
         VPCID:
           Fn::GetAtt:
           - VPCStack

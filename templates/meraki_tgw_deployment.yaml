@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-   This template deploys a transit gateway in a VPC and creates a TGW attachment to the avalaible subnets in the VPC.
+   This template deploys a transit gateway in a VPC and creates a TGW attachment to the avalaible subnets in the VPC. (qs-1s3afc2th)
 Parameters:
 
   VPCID:
@@ -50,6 +50,21 @@ Resources:
             - '-'
             - - !Ref 'AWS::StackName'
               - vmx-vpc-attach
+
+  TransitGatewaySDWANRouteTable:
+    Type: "AWS::EC2::TransitGatewayRouteTable"
+    Properties:
+      Tags: 
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-SDWANrtb
+      TransitGatewayId: !Ref TransitGateway
+  
+  SdwanRouteTablePropogation:
+    Type: "AWS::EC2::TransitGatewayRouteTablePropagation"
+    Properties:
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
+
 
 Outputs:
   TransitGatewayID:
