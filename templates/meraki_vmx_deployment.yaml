@@ -16,10 +16,6 @@ Parameters:
     Description: Amazon EC2 Key Pair
     Type: 'AWS::EC2::KeyPair::KeyName'
 
-  VPCID:
-    Description: 'ID of the VPC (e.g., vpc-0343606e)'
-    Type: 'AWS::EC2::VPC::Id'
-
   AvailabilityZone1SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
     Type: 'AWS::EC2::Subnet::Id'
