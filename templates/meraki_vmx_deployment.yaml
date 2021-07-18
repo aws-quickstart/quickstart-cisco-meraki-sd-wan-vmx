@@ -92,6 +92,12 @@ Resources:
           SubnetId: !Ref 'AvailabilityZone1SubnetID'
       UserData:
         Fn::Base64: !Ref 'vMX1Token'
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - vmx-1  
   vMX2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -108,7 +114,12 @@ Resources:
           SubnetId: !Ref 'AvailabilityZone2SubnetID'
       UserData:
         Fn::Base64: !Ref 'vMX2Token'
-
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - vmx-2
 Outputs:
   vMX1InstanceID:
     Value: !Ref 'vMX1Instance'

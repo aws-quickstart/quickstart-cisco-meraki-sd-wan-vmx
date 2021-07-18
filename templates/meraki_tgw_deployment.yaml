@@ -19,6 +19,48 @@ Parameters:
     Description: ASN to be used for the Amazon TGW
     Type: String
 
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: String
+
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: implementing/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+
+  vMX1InstanceID:
+    Description: "The instance ID for the vMX1 instace"
+    Type: String
+
+  vMX2InstanceID:
+    Description: "The instance ID for the vMX1 instace"
+    Type: String
+
+  SDWANVPCRTID:
+    Description: "The instance ID for the SD-WAN VPC route table"
+    Type: String
+
+  MerakiAPIKey:
+    Description: "The API Key for the Meraki Org"
+    Type: String
+
+  MerakiOrgName:
+    Description: "The Meraki Org name to run the lambda for"
+    Type: String
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
+
 Resources:
   TransitGateway:
     Type: "AWS::EC2::TransitGateway"
@@ -64,6 +106,66 @@ Resources:
     Properties:
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
       TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
+  
+  CopyLambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 
+        - >-
+          https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/copy-lambdas.yaml
+        - S3Region: !If 
+            - UsingDefaultBucket
+            - !Ref 'AWS::Region'
+            - !Ref QSS3BucketRegion
+          S3Bucket: !If 
+            - UsingDefaultBucket
+            - !Sub '${QSS3BucketName}-${AWS::Region}'
+            - !Ref QSS3BucketName
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  LambdaBasicExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+          Condition: {}
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-vmxEc2VpnAllow
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ec2:*"
+                Resource: "*"
+
+  vMXTransitGatewayRTLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.main
+      Timeout: 60
+      Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
+      Runtime: python3.7
+      Code:
+        S3Bucket: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
+        S3Key: !Sub "${QSS3KeyPrefix}functions/packages/lambda.zip"
+      MemorySize: 3008
+      Environment:
+        Variables:
+          MERAKI_API_KEY: !Ref 'MerakiAPIKey'
+          MERAKI_ORG_NAME: !Ref 'MerakiOrgName'
+          TGW_RT_ID: !Ref 'TransitGatewaySDWANRouteTable'
+          TGW_ATTACH_ID: !Ref 'TransitGatewayAttachment'
+          VMX1_ID: !Ref 'vMX1InstanceID'
+          VMX2_ID: !Ref 'vMX2InstanceID'
+          RT_ID: !Ref 'SDWANVPCRTID'
 
 
 Outputs:

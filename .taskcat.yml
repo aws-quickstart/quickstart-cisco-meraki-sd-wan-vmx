@@ -18,3 +18,5 @@ tests:
       vMX2Token: "change_to_token_generated_from_meraki_dashboard"
       AmazonSideASN: 65512
       InstanceType: c5.xlarge
+      MerakiAPIKey: "change_me_to_match_your_api_key"
+      MerakiOrgName: "change_me_to_match_your_org_name"
