@@ -36,6 +36,20 @@ def get_all_vpn_routes(dashboard, org_id):
     
     return vpn_routes
 
+def get_active_vmx(dashboard, org_id, vmx1_id, vmx2_id):
+    org_device_status = dashboard.organizations.getOrganizationDevicesStatuses(
+        org_id, total_pages='all'
+    )
+    for device in org_device_status:
+        if device['id'] == vmx1_id and device['status'] == 'online':
+            active_vmx = vmx1_id
+        elif device['id'] == vmx2_id and device['status'] == 'online':
+            active_vmx = vmx2_id
+        else:
+            print("Both vMXs are offline")
+    
+    return active_vmx
+
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
     region = os.environ['AWS_REGION']
     print(region, tgw_rt_id, tgw_attach_id)
@@ -58,14 +72,13 @@ def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
             else:
                 raise error
 
-def update_vpc_rt(vpn_routes, vmx1_id, vmx2_id, rt_id):
+def update_vpc_rt(vpn_routes, vmx_id, rt_id):
     region = os.environ['AWS_REGION']
     #region = 'us-east-1'
     ec2 = boto3.client('ec2', region_name=region)
     uniq_vpn_routes = list(set(vpn_routes))
     print(uniq_vpn_routes)
-    #TODO: add function to check vmx status, for now assuming vmx-1 is always up
-    instance_id = vmx1_id 
+    instance_id = vmx_id
     for route in uniq_vpn_routes:
         try:
             ec2.create_route(
@@ -86,8 +99,9 @@ def main(event, context):
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id)
     print(vpn_routes)
     print("Calling update tgw_rts")
+    active_vmx_id = get_all_vpn_routes(meraki_dashboard, org_id, VMX1_ID, VMX2_ID)
     update_tgw_rt(vpn_routes, TGW_RT_ID, TGW_ATTACH_ID)
-    update_vpc_rt(vpn_routes, VMX1_ID, VMX2_ID, RT_ID)
+    update_vpc_rt(vpn_routes, active_vmx_id, RT_ID)
 
     return vpn_routes
 
