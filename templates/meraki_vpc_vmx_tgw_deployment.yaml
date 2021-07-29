@@ -84,6 +84,18 @@ Parameters:
     Description: ASN to be used for the Amazon TGW
     Type: String
 
+  LambdaRate:
+    Description: >
+      The rate (frequency) that determines when CloudWatch Events runs the rule that
+      triggers the Route Monitor Lambda function.
+    Default: rate(1 minute)
+    AllowedValues:
+      - rate(1 minute)
+      - rate(10 minutes)
+      - rate(60 minutes)
+    Type: String
+  
+
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
 
@@ -180,6 +192,8 @@ Resources:
           Ref: MerakiAPIKey
         MerakiOrgName:
           Ref: MerakiOrgName
+        LambdaRate:
+          Ref: LambdaRate
         
 Outputs:
   VPCID:

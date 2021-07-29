@@ -58,6 +58,17 @@ Parameters:
     Description: "The Meraki Org name to run the lambda for"
     Type: String
 
+  LambdaRate:
+    Description: >
+      The rate (frequency) that determines when CloudWatch Events runs the rule that
+      triggers the Route Monitor Lambda function.
+    Default: rate(1 minute)
+    AllowedValues:
+      - rate(1 minute)
+      - rate(10 minutes)
+      - rate(60 minutes)
+    Type: String
+
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
 
@@ -143,6 +154,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
                   - "ec2:*"
                 Resource: "*"
 
@@ -166,6 +183,65 @@ Resources:
           VMX1_ID: !Ref 'vMX1InstanceID'
           VMX2_ID: !Ref 'vMX2InstanceID'
           RT_ID: !Ref 'SDWANVPCRTID'
+  
+  LambdaSchedulePermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub ${vMXTransitGatewayRTLambda.Arn}
+      Principal: 'events.amazonaws.com'
+      SourceArn: !Sub ${LambdaSchedule.Arn}
+    DependsOn:
+      - LambdaSchedule
+
+  LambdaSchedule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: >
+        A schedule for the TGW Route Monitor Lambda function..
+      ScheduleExpression: !Ref LambdaRate
+      State: ENABLED
+      Targets:
+        - Arn: !Sub ${vMXTransitGatewayRTLambda.Arn}
+          Id: LambdaSchedule
+    DependsOn:
+      - vMXTransitGatewayRTLambda
+
+  LambdaEC2Rule:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "EventRule"
+      EventPattern: 
+        source: 
+          - "aws.ec2"
+        detail-type: 
+          - "EC2 Instance State-change Notification"
+        detail: 
+          state: 
+            - "stopping"
+            - "stopped"
+            - "terminated"
+            - "shutting-down"
+            - "starting"
+          instance-id:
+            - !Ref 'vMX1InstanceID'
+            - !Ref 'vMX2InstanceID'
+      State: "ENABLED"
+      Targets:
+          - Arn: !Sub ${vMXTransitGatewayRTLambda.Arn}
+            Id: LambdaEC2Rule
+    DependsOn:
+      - vMXTransitGatewayRTLambda
+
+  LambdaEC2SchedulePermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub ${vMXTransitGatewayRTLambda.Arn}
+      Principal: 'events.amazonaws.com'
+      SourceArn: !Sub ${LambdaEC2Rule.Arn}
+    DependsOn:
+      - LambdaEC2Rule
 
 
 Outputs:
