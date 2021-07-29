@@ -25,41 +25,50 @@ def meraki_connector(api_key, org_name):
     return meraki_dashboard_sdk_auth, org_id
 
 
-def get_all_vpn_routes(dashboard, org_id):
+def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
     org_vpn_status = dashboard.appliance.getOrganizationApplianceVpnStatuses(
     org_id, total_pages='all'
     )
-    vpn_routes = []
+    vpn_routes_vmx1 = []
+    vpn_routes_vmx2 = []
     for networks in org_vpn_status:
-        for subnets in networks['exportedSubnets']:
-            vpn_routes.append(subnets.get('subnet'))
+        if networks['vpnMode'] == 'spoke' and networks['merakiVpnPeers'][0]['networkId'] == vmx1_id:
+            for subnets in networks['exportedSubnets']:
+                vpn_routes_vmx1.append(subnets.get('subnet'))
     
-    return vpn_routes
+        elif networks['vpnMode'] == 'spoke' and networks['merakiVpnPeers'][0]['networkId'] == vmx2_id:
+            for subnets in networks['exportedSubnets']:
+                vpn_routes_vmx2.append(subnets.get('subnet'))
+        else:
+            pass 
 
-def get_active_vmx(dashboard, org_id, vmx1_id, vmx2_id):
+    return vpn_routes_vmx1, vpn_routes_vmx2
+
+def get_tagged_networks(dashboard, org_id):
+    vmx1tag = 'vmx1'
+    vmx2tag = 'vmx2'
+    # executing API call to obtain all Meraki networks in the organization
+    organization_networks_response = dashboard.organizations.getOrganizationNetworks(
+        org_id, total_pages='all'
+    )
+    vmx1 = [x for x in organization_networks_response if str(vmx1tag) in str(x['tags'])[1:-1]]
+    vmx2 = [x for x in organization_networks_response if str(vmx2tag) in str(x['tags'])[1:-1]] 
+
+    return vmx1[0]['id'], vmx2[0]['id']
+
+def check_vmx_status(dashboard, org_id, vmx_id):
     org_device_status = dashboard.organizations.getOrganizationDevicesStatuses(
         org_id, total_pages='all'
     )
-    for device in org_device_status:
-        if device['id'] == vmx1_id and device['status'] == 'online':
-            active_vmx = vmx1_id
-        elif device['id'] == vmx2_id and device['status'] == 'online':
-            active_vmx = vmx2_id
-        else:
-            print("Both vMXs are offline")
-    
-    return active_vmx
+    vmx_status = [x for x in org_device_status if str(vmx_id) in str(x['networkId'])][0]['status']
 
+    return vmx_status
+            
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
     region = os.environ['AWS_REGION']
     print(region, tgw_rt_id, tgw_attach_id)
     ec2 = boto3.client('ec2', region_name=region)
-    vpn_routes = vpn_routes
-    tgw_rt_id = tgw_rt_id
-    #Removing duplicates from the vpn routes list
-    uniq_vpn_routes = list(set(vpn_routes))
-    print(uniq_vpn_routes)
-    for route in uniq_vpn_routes:
+    for route in vpn_routes:
         try:
             ec2.create_transit_gateway_route(
             DestinationCidrBlock= route,
@@ -68,7 +77,12 @@ def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
            )
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'RouteAlreadyExists':
-                print("Route already exsists:", route)
+                print("TGW Route already exsists, updating it", route)
+                ec2.replace_transit_gateway_route(
+                DestinationCidrBlock= route,
+                TransitGatewayRouteTableId=tgw_rt_id,
+                TransitGatewayAttachmentId=tgw_attach_id
+                )
             else:
                 raise error
 
@@ -88,7 +102,12 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
             )
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'RouteAlreadyExists':
-                print("Route already exsists", route)
+                print("VPC Route already exsists, updating it", route)
+                ec2.replace_route(
+                DestinationCidrBlock=route,
+                InstanceId=instance_id,
+                RouteTableId=rt_id
+                )
             else:
                 raise error 
 
@@ -96,14 +115,29 @@ def main(event, context):
     meraki_auth = meraki_connector(API_KEY, ORG_NAME)
     meraki_dashboard = meraki_auth[0]
     org_id = meraki_auth[1]
-    vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id)
-    print(vpn_routes)
-    print("Calling update tgw_rts")
-    active_vmx_id = get_all_vpn_routes(meraki_dashboard, org_id, VMX1_ID, VMX2_ID)
-    update_tgw_rt(vpn_routes, TGW_RT_ID, TGW_ATTACH_ID)
-    update_vpc_rt(vpn_routes, active_vmx_id, RT_ID)
-
-    return vpn_routes
+    #get vmx ids using tags
+    vmxids= get_tagged_networks(meraki_dashboard, org_id)
+    print(vmxids[0], vmxids[1])
+    vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
+    for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
+    vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0])
+    vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1])
+    if vmx1_status == 'online' and vmx2_status == 'online':
+        print("both vmxs are online")
+        update_vpc_rt(vpn_routes[0], VMX1_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], VMX2_ID, RT_ID)
+    elif vmx1_status == 'online' and vmx2_status == 'offline':
+        print ("vmx1 online and vmx2 offline, moving all routes to vmx1")
+        update_vpc_rt(vpn_routes[0], VMX1_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], VMX1_ID, RT_ID)
+    elif vmx1_status == 'offline' and vmx2_status == 'online':
+        print ("vmx2 online and vmx1 is offline")
+        update_vpc_rt(vpn_routes[0], VMX2_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], VMX2_ID, RT_ID)
+    else:
+        print ("both vmxs are offline") 
+    
+    #return vpn_routes
 
 if __name__ == "__main__":   
     main('', '')
