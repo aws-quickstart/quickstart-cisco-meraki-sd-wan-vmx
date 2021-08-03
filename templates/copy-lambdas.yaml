@@ -131,7 +131,7 @@ Resources:
             Service: lambda.amazonaws.com
         Version: '2012-10-17'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - !Sub arn:${AWS::Partition}:iam::${AWS::Partition}:policy/service-role/AWSLambdaBasicExecutionRole
       Path: "/"
       Policies:
       - PolicyDocument:
@@ -140,7 +140,7 @@ Resources:
             - s3:GetObject
             Effect: Allow
             Resource:
-            - Fn::Sub: arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*
+            - Fn::Sub: arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*
           - Action:
             - s3:PutObject
             - s3:DeleteObject
@@ -152,8 +152,8 @@ Resources:
             - s3:GetBucketVersioning
             Effect: Allow
             Resource:
-            - Fn::Sub: arn:aws:s3:::${LambdaZipsBucket}/${QSS3KeyPrefix}*
-            - Fn::Sub: arn:aws:s3:::${LambdaZipsBucket}
+            - Fn::Sub: arn:${AWS::Partition}:s3:::${LambdaZipsBucket}/${QSS3KeyPrefix}*
+            - Fn::Sub: arn:${AWS::Partition}:s3:::${LambdaZipsBucket}
           Version: '2012-10-17'
         PolicyName: object-copier
     Type: AWS::IAM::Role
@@ -285,7 +285,7 @@ Resources:
             Service: lambda.amazonaws.com
         Version: '2012-10-17'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - !Sub arn:${AWS::Partition}:iam::${AWS::Partition}:policy/service-role/AWSLambdaBasicExecutionRole
       Path: "/"
       Policies:
       - PolicyDocument:
@@ -304,7 +304,7 @@ Resources:
             - Fn::GetAtt:
               - LambdaZipsBucket
               - Arn
-            - Fn::Sub: arn:aws:s3:::*
+            - Fn::Sub: arn:${AWS::Partition}:s3:::*
           Version: '2012-10-17'
         PolicyName: Empty-bucket
     Type: AWS::IAM::Role
