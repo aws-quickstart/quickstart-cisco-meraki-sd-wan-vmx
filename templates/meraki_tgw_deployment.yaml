@@ -53,6 +53,7 @@ Parameters:
   MerakiAPIKey:
     Description: "The API Key for the Meraki Org"
     Type: String
+    NoEcho: 'true'
 
   MerakiOrgName:
     Description: "The Meraki Org name to run the lambda for"
@@ -210,7 +211,7 @@ Resources:
   LambdaEC2Rule:
     Type: AWS::Events::Rule
     Properties: 
-      Description: "EventRule"
+      Description: "EventRule to trigger Lambda function on an instance state change for the vMXs"
       EventPattern: 
         source: 
           - "aws.ec2"

@@ -32,6 +32,11 @@ Parameters:
     Description: Onboarding token to be used for the vMX-2
     Type: String
 
+  MerakiAPIKey:
+    Description: "The API Key for the Meraki Org"
+    Type: String
+    NoEcho: 'true'
+
 Mappings:
   AWSVMXAMI:
     us-east-1:
@@ -120,6 +125,19 @@ Resources:
             - '-'
             - - !Ref 'AWS::StackName'
               - vmx-2
+  MerakiApiKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: MerakiAPIKey
+      Description: This is the API key for the meraki dashboard
+      SecretString: !Sub '{"merakiapikey":"${MerakiAPIKey}" }'
+      Tags:
+        - Key: AppName
+          Value: !Join
+          - '-'
+          - - !Ref 'AWS::StackName'
+            - merakiapikey
+
 Outputs:
   vMX1InstanceID:
     Value: !Ref 'vMX1Instance'

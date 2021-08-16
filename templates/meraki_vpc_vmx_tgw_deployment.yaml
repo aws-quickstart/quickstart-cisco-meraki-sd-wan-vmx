@@ -6,6 +6,7 @@ Parameters:
   MerakiAPIKey:
     Description: "The API Key for the Meraki Org"
     Type: String
+    NoEcho: 'true'
 
   MerakiOrgName:
     Description: "The Meraki Org name to run the lambda for"
@@ -145,6 +146,8 @@ Resources:
           Ref: vMX1Token
         vMX2Token:
           Ref: vMX2Token
+        MerakiAPIKey:
+          Ref: MerakiAPIKey
 
   TGWStack:
     DependsOn: VPCStack
