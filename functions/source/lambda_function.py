@@ -122,32 +122,35 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region)
     uniq_vpn_routes = list(set(vpn_routes))
-    logger.info(uniq_vpn_routes)
-    exsisting_vpc_rts = ec2.describe_route_tables(Filters = [{"Name": "route-table-id", "Values": [rt_id]}])['RouteTables'][0]['Routes']
-    print('existing route {0}'.format(exsisting_vpc_rts))
-    print('new routes {0}'.format(uniq_vpn_routes))
-    for nroutes in uniq_vpn_routes:
-        for eroutes in exsisting_vpc_rts:
-            if nroutes == eroutes['DestinationCidrBlock'] and vmx_id == eroutes['InstanceId']:
-                logger.info('No route change, doing nothing!')
-                print(eroutes['InstanceId'])
-                break
-            elif nroutes == eroutes['DestinationCidrBlock'] and vmx_id != eroutes['InstanceId']:
-                logger.info('Change in route, updating the route table')
-                ec2.replace_route(
-                DestinationCidrBlock=nroutes,
+    raw_exsisting_vpc_rts = ec2.describe_route_tables(Filters = [{"Name": "route-table-id", "Values": [rt_id]}])['RouteTables'][0]['Routes']
+    exsisting_routes = []
+    for routes in raw_exsisting_vpc_rts:
+        if 'InstanceId' in routes and routes['InstanceId'] == vmx_id:
+            exsisting_routes.append(routes['DestinationCidrBlock'])
+        else:
+            print('No matching routes found')
+    #Compare exsisting routes with new routes
+    print("exsisting routes {0}".format(exsisting_routes))
+    print("new routes {0}".format(uniq_vpn_routes))
+    update_routes = [x for x in exsisting_routes + uniq_vpn_routes if x not in exsisting_routes]
+    if update_routes:
+        logger.info("New routes for update {0}".format(update_routes))
+        for routes in update_routes:
+            try:
+                ec2.create_route(
+                DestinationCidrBlock=routes,
                 InstanceId=vmx_id,
                 RouteTableId=rt_id
-                )
-                break
-            else:
-                logger.info(nroutes)
-                logger.info("New route, adding the route")
-                ec2.create_route(
-                DestinationCidrBlock=nroutes,
-                InstanceId=vmx_id,
-                RouteTableId=rt_id 
-            ) 
+              )
+            except botocore.exceptions.ClientError as error:
+                if error.response['Error']['Code'] == 'RouteAlreadyExists':
+                    ec2.replace_route(
+                    DestinationCidrBlock=routes,
+                    InstanceId=vmx_id,
+                    RouteTableId=rt_id
+                )  
+    else:
+        logger.info("No new routes for update") 
 
 def main(event, context):
     meraki_api_key = get_meraki_key()
@@ -155,15 +158,16 @@ def main(event, context):
     org_id = ORG_ID
     #get vmx ids using tags
     vmxids= get_tagged_networks(meraki_dashboard, org_id)
-    logger.info(vmxids[0], vmxids[1])
+    print(vmxids)
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
     for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
-    vpn_routes = (['10.198.0.0/24', '10.193.0.0/24'], ['10.188.0.0/24'])
     vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
     vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
     if vmx1_status == 'online' and vmx2_status == 'online':
         logger.info("both vmxs are online")
+        logger.info("Updating VPC route table for vMX1")
         update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
+        logger.info("Updating VPC route table for vMX2")
         update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
     elif vmx1_status == 'online' and vmx2_status == 'offline':
         logger.info ("vmx1 online and vmx2 offline, moving all routes to vmx1")
@@ -171,7 +175,9 @@ def main(event, context):
         update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
     elif vmx1_status == 'offline' and vmx2_status == 'online':
         logger.info ("vmx2 online and vmx1 is offline")
+        logger.info("Updating VPC route table for vMX1")
         update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
+        logger.info("Updating VPC route table for vMX2")
         update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
     else:
         logger.info ("both vmxs are offline")
