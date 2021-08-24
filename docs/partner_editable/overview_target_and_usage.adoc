@@ -1,7 +1,4 @@
-// Replace the content in <>
-// Identify your target audience and explain how/why they would use this Quick Start.
-//Avoid borrowing text from third-party websites (copying text from AWS service documentation is fine). Also, avoid marketing-speak, focusing instead on the technical aspect.
+This guide provides instructions and the Quick Start reference architecture for deploying Cisco Meraki's virtual MX solution with AWS Transit Gateway integration on the AWS Cloud.
 
-This guide provides instructions for deploying the {partner-product-short-name} Quick Start reference architecture on the AWS Cloud.
-
-This Quick Start is for users who <target audience and usage scenario>
+This Quick Start is designed for multiple audiences, including IT architects, network administrators, DevOps professionals
+and exsisting Meraki customers leveraging the virtual MX in the cloud. 

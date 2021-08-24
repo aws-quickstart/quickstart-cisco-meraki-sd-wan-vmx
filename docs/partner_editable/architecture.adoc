@@ -12,18 +12,11 @@ image::../images/architecture_diagram.png[Architecture]
 
 As shown in <<architecture1>>, the Quick Start sets up the following:
 
-* A highly available architecture that spans two Availability Zones.*
-* A VPC configured with public and private subnets, according to AWS
-best practices, to provide you with your own virtual network on AWS.*
-* In the public subnets:
-** Managed network address translation (NAT) gateways to allow outbound
-internet access for resources in the private subnets.*
-** A Linux bastion host in an Auto Scaling group to allow inbound Secure
-Shell (SSH) access to EC2 instances in public and private subnets.*
-* In the private subnets:
-** <item>.
-** <item>.
-// Add bullet points for any additional components that are included in the deployment. Make sure that the additional components are also represented in the architecture diagram. End each bullet with a period.
-* <describe any additional components>.
-
-[.small]#* The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
+* A highly available architecture that spans two Availability Zones.
+* A SDWAN VPC configured with public internet access, according to AWS
+best practices, to provide you with your own virtual network on AWS.
+* In the SD-WAN VPC:
+** An internet gateway for public internet access is deployed
+** Two vMX appliances are deployed and onboarded to their corresponding Meraki networks
+* In addition a Transit Gateway is deployed and the SD-WAN VPC is attached as a VPC attachment to the TGW
+* A lambda function is deployed to monitor the state of the vMXs and update the VPC and the TGW route tables to handle failover and failback.
