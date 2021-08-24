@@ -9,6 +9,7 @@ import sys
 
 from botocore.exceptions import ClientError
 
+#logging.basicConfig(stream = sys.stdout)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -44,10 +45,11 @@ def get_meraki_key():
         if 'SecretString' in get_secret_value_response:
             text_secret_data = json.loads(get_secret_value_response['SecretString'])
             merakiapikey = text_secret_data['merakiapikey']
+            return merakiapikey
         else:
             binary_secret_data = get_secret_value_response['SecretBinary']
+            return binary_secret_data
     
-    return merakiapikey
 
 def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
     org_vpn_status = dashboard.appliance.getOrganizationApplianceVpnStatuses(
@@ -98,7 +100,6 @@ def check_vmx_status(dashboard, org_id, vmx_id, ec2_vmx1_id):
             
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
     region = os.environ['AWS_REGION']
-    logger.info(region, tgw_rt_id, tgw_attach_id)
     ec2 = boto3.client('ec2', region_name=region)
     for route in vpn_routes:
         try:
@@ -128,10 +129,8 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
         if 'InstanceId' in routes and routes['InstanceId'] == vmx_id:
             exsisting_routes.append(routes['DestinationCidrBlock'])
         else:
-            print('No matching routes found')
+            logger.info('No matching routes found')
     #Compare exsisting routes with new routes
-    print("exsisting routes {0}".format(exsisting_routes))
-    print("new routes {0}".format(uniq_vpn_routes))
     update_routes = [x for x in exsisting_routes + uniq_vpn_routes if x not in exsisting_routes]
     if update_routes:
         logger.info("New routes for update {0}".format(update_routes))
@@ -158,13 +157,12 @@ def main(event, context):
     org_id = ORG_ID
     #get vmx ids using tags
     vmxids= get_tagged_networks(meraki_dashboard, org_id)
-    print(vmxids)
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
     for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
     vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
     vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
     if vmx1_status == 'online' and vmx2_status == 'online':
-        logger.info("both vmxs are online")
+        logger.info("Both vmxs are online")
         logger.info("Updating VPC route table for vMX1")
         update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
         logger.info("Updating VPC route table for vMX2")
@@ -175,9 +173,8 @@ def main(event, context):
         update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
     elif vmx1_status == 'offline' and vmx2_status == 'online':
         logger.info ("vmx2 online and vmx1 is offline")
-        logger.info("Updating VPC route table for vMX1")
-        update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
         logger.info("Updating VPC route table for vMX2")
+        update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
         update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
     else:
         logger.info ("both vmxs are offline")
