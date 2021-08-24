@@ -36,8 +36,8 @@
         "ParameterValue": "override_this_with_token_from_dashboard"
     },
     {
-        "ParameterKey": "MerakiOrgName",
-        "ParameterValue": "override_this_with_token_from_dashboard"
+        "ParameterKey": "MerakiOrgID",
+        "ParameterValue": "override_this_with_your_meraki_org_id"
     },
     {
         "ParameterKey": "AmazonSideASN",
