@@ -178,7 +178,7 @@ Resources:
       Environment:
         Variables:
           MERAKI_API_KEY: !Ref 'MerakiAPIKey'
-          MERAKI_ORG_NAME: !Ref 'MerakiOrgName'
+          MERAKI_ORG_ID: !Ref 'MerakiOrgID'
           TGW_RT_ID: !Ref 'TransitGatewaySDWANRouteTable'
           TGW_ATTACH_ID: !Ref 'TransitGatewayAttachment'
           VMX1_ID: !Ref 'vMX1InstanceID'
