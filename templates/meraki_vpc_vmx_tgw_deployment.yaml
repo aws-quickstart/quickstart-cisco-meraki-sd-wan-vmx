@@ -193,8 +193,8 @@ Resources:
           - Outputs.PublicSubnetRouteTable
         MerakiAPIKey:
           Ref: MerakiAPIKey
-        MerakiOrgName:
-          Ref: MerakiOrgName
+        MerakiOrgID:
+          Ref: MerakiOrgID
         LambdaRate:
           Ref: LambdaRate
         
