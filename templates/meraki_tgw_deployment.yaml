@@ -164,7 +164,7 @@ Resources:
                   - ec2:CreateRoute
                   - ec2:ReplaceRoute
                 Resource: !Sub arn:${AWS::Partition}:route-table:*:*:*
-              - Effects: Allow
+              - Effect: Allow
                 Action:
                   - ec2:DescribeTransitGatewayRouteTables
                   - ec2:DescribeTransitGatewayAttachments
