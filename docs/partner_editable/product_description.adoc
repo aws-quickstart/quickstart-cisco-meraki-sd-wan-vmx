@@ -1,6 +1,12 @@
 // Replace the content in <>
 // Briefly describe the software. Use consistent and clear branding. 
 // Include the benefits of using the software on AWS, and provide details on usage scenarios.
+Virtual MX (vMX) is a virtual instance of a Meraki security and
+SD-WAN appliance dedicated specifically to providing the simple
+configuration benefits of site-to-site Auto VPN for organizations
+running or migrating IT services to public or private cloud
+environments. An Auto VPN tunnel to a vMX is like having a direct
+Ethernet connection to a private data center.
 
-For instructions on how the vMX works on AWS, please see the Meraki KB here:
-https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)
+vMX functions like a VPN concentrator and includes SD-WAN functionality like other MX devices. 
+For instructions on how the vMX works on AWS, please see the Meraki documentation for https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for AWS^]
