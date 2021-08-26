@@ -3,7 +3,7 @@ Description: >-
    This template deploys two meraki vMX appliances in a VPC in different avalaibility zones. (qs-1s3afc2ta)
 Parameters:
   InstanceType:
-    Description: EC2 instance type
+    Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
     Type: String
     Default: c5.large
     AllowedValues:
@@ -11,29 +11,23 @@ Parameters:
       - c5.xlarge
       - m4.large
     ConstraintDescription: must be a valid EC2 instance type.
-
   KeyPairName:
-    Description: Amazon EC2 Key Pair
+    Description: Name of an existing EC2 KeyPair, vMX instances will launch with this key pair
     Type: 'AWS::EC2::KeyPair::KeyName'
-
   AvailabilityZone1SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
     Type: 'AWS::EC2::Subnet::Id'
-
   AvailabilityZone2SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-2 in Availability Zone 2
     Type: 'AWS::EC2::Subnet::Id'
-
   vMX1Token:
-    Description: Onboarding token to be used for the vMX-1
+    Description: Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard. 
     Type: String
-
   vMX2Token:
-    Description: Onboarding token to be used for the vMX-2
+    Description: Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.
     Type: String
-
   MerakiAPIKey:
-    Description: "The API Key for the Meraki Org"
+    Description: "The API Key for your Meraki Organization"
     Type: String
     NoEcho: 'true'
 

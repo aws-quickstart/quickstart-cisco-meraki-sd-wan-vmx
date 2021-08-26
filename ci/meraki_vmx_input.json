@@ -33,7 +33,7 @@
     },
     {
         "ParameterKey": "MerakiAPIKey",
-        "ParameterValue": "override_this_with_token_from_dashboard"
+        "ParameterValue": "override_this_with_your_meraki_api_key"
     },
     {
         "ParameterKey": "MerakiOrgID",

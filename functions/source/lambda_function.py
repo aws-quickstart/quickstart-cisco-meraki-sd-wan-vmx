@@ -9,7 +9,7 @@ import sys
 
 from botocore.exceptions import ClientError
 
-#logging.basicConfig(stream = sys.stdout)
+logging.basicConfig(stream = sys.stdout)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -34,11 +34,11 @@ def get_meraki_key():
         )
     except ClientError as e:
         if e.response['Error']['Code'] == 'ResourceNotFoundException':
-            logger.info("The requested secret " + secret_name + " was not found")
+            logger.info('The requested secret ' + secret_name + ' was not found')
         elif e.response['Error']['Code'] == 'InvalidRequestException':
-            logger.info("The request was invalid due to {}:".format(e))
+            logger.info('The request was invalid due to {}:'.format(e))
         elif e.response['Error']['Code'] == 'InvalidParameterException':
-            logger.info("The request had invalid params: {}".format(e))
+            logger.info('The request had invalid params: {}'.format(e))
     else:
         # Secrets Manager decrypts the secret value using the associated KMS CMK
         # Depending on whether the secret was a string or binary, only one of these fields will be populated
@@ -50,7 +50,6 @@ def get_meraki_key():
             binary_secret_data = get_secret_value_response['SecretBinary']
             return binary_secret_data
     
-
 def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
     org_vpn_status = dashboard.appliance.getOrganizationApplianceVpnStatuses(
     org_id, total_pages='all'
@@ -66,9 +65,8 @@ def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
             for subnets in networks['exportedSubnets']:
                 vpn_routes_vmx2.append(subnets.get('subnet'))
         else:
-            logger.info("No routes found for vMX Hubs ")
+            logger.info('Meraki Dashboard: No routes found for vMX Hubs')
             pass 
-
     return vpn_routes_vmx1, vpn_routes_vmx2
 
 def get_tagged_networks(dashboard, org_id):
@@ -101,39 +99,43 @@ def check_vmx_status(dashboard, org_id, vmx_id, ec2_vmx1_id):
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region)
+    #Checking if the route already exsists, if so skip updating the TGW route table
     for route in vpn_routes:
-        try:
+        exsisting_route = ec2.search_transit_gateway_routes(
+            TransitGatewayRouteTableId= tgw_rt_id,
+            Filters=[
+                { 'Name': 'route-search.exact-match',
+                  'Values': [route]
+
+            }]
+        )
+        if bool(exsisting_route['Routes']):
+            logger.info("Transit Gateway RT: No update, route {0} exsists, skipping update".format(route))
+            pass
+        else:
+            logger.info("Transit Gateway RT: New route, adding route {0}".format(route))
             ec2.create_transit_gateway_route(
             DestinationCidrBlock= route,
             TransitGatewayRouteTableId=tgw_rt_id,
             TransitGatewayAttachmentId=tgw_attach_id
            )
-        except botocore.exceptions.ClientError as error:
-            if error.response['Error']['Code'] == 'RouteAlreadyExists':
-                logger.info("TGW Route already exsists, updating it {}".format(route))
-                ec2.replace_transit_gateway_route(
-                DestinationCidrBlock= route,
-                TransitGatewayRouteTableId=tgw_rt_id,
-                TransitGatewayAttachmentId=tgw_attach_id
-                )
-            else:
-                raise error
 
 def update_vpc_rt(vpn_routes, vmx_id, rt_id):
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region)
     uniq_vpn_routes = list(set(vpn_routes))
+    #Checking exsisting routes in the VPC table
     raw_exsisting_vpc_rts = ec2.describe_route_tables(Filters = [{"Name": "route-table-id", "Values": [rt_id]}])['RouteTables'][0]['Routes']
     exsisting_routes = []
     for routes in raw_exsisting_vpc_rts:
         if 'InstanceId' in routes and routes['InstanceId'] == vmx_id:
             exsisting_routes.append(routes['DestinationCidrBlock'])
         else:
-            logger.info('No matching routes found')
+            logger.info('VPC RT: No matching routes found')
     #Compare exsisting routes with new routes
     update_routes = [x for x in exsisting_routes + uniq_vpn_routes if x not in exsisting_routes]
     if update_routes:
-        logger.info("New routes for update {0}".format(update_routes))
+        logger.info('VPC RT: New routes for update {0}'.format(update_routes))
         for routes in update_routes:
             try:
                 ec2.create_route(
@@ -149,7 +151,7 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
                     RouteTableId=rt_id
                 )  
     else:
-        logger.info("No new routes for update") 
+        logger.info('VPC RT: No new routes for update') 
 
 def main(event, context):
     meraki_api_key = get_meraki_key()
@@ -158,27 +160,29 @@ def main(event, context):
     #get vmx ids using tags
     vmxids= get_tagged_networks(meraki_dashboard, org_id)
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
+    # Update TGW routes
     for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
     vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
     vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
     if vmx1_status == 'online' and vmx2_status == 'online':
-        logger.info("Both vmxs are online")
-        logger.info("Updating VPC route table for vMX1")
+        logger.info('vMX Status: vmx1 and vmx2 are both online')
+        logger.info('VPC RT Update: Updating VPC route table for vMX1')
         update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
-        logger.info("Updating VPC route table for vMX2")
+        logger.info('VPC RT Update: Updating VPC route table for vMX2')
         update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
     elif vmx1_status == 'online' and vmx2_status == 'offline':
-        logger.info ("vmx1 online and vmx2 offline, moving all routes to vmx1")
+        logger.info ("vMX Status: vmx1 online and vmx2 offline, moving all routes to vmx1")
+        logger.info('VPC RT Update: Updating VPC route table for vMX1')
         update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
         update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
     elif vmx1_status == 'offline' and vmx2_status == 'online':
-        logger.info ("vmx2 online and vmx1 is offline")
-        logger.info("Updating VPC route table for vMX2")
+        logger.info ("vMX Status: vmx2 online and vmx1 offline, moving all routes to vmx2")
+        logger.info('VPC RT Update: Updating VPC route table for vMX2')
         update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
         update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
     else:
-        logger.info ("both vmxs are offline")
-        #TODO: Emphasis that both are offline. Cloudwatch enhancement.     
+        logger.info ('vMX1 and vMX2 are BOTH offline')
+        #TODO: Cloudwatch enhancement to generate alerts when both vMXs are offline   
     #return vpn_routes
 
 if __name__ == "__main__":   

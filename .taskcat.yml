@@ -4,7 +4,7 @@ project:
   - us-east-1
 tests:
   default:
-    template: ./templates/meraki_vpc_vmx_tgw_deployment.yaml
+    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-main.yaml
     regions:
     - us-east-1
     parameters:

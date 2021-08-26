@@ -7,6 +7,6 @@ global:
 tests:
   default:
     parameter_input: meraki_vmx_input.json 
-    template_file: meraki_vpc_vmx_tgw_deployment.yaml
+    template_file: quickstart-cisco-meraki-sdwan-vmx-main.yaml
     regions:
       - us-east-1

@@ -1,69 +1,56 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-   This template deploys a transit gateway in a VPC and creates a TGW attachment to the avalaible subnets in the VPC. (qs-1s3afc2th)
+   This template deploys a transit gateway in and attaches the SD-WAN vpc to it via VPC attachment (qs-1s3afc2th)
 Parameters:
-
   VPCID:
     Description: 'ID of the VPC (e.g., vpc-0343606e)'
     Type: 'AWS::EC2::VPC::Id'
-
   AvailabilityZone1SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
     Type: 'AWS::EC2::Subnet::Id'
-
   AvailabilityZone2SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-2 in Availability Zone 2
     Type: 'AWS::EC2::Subnet::Id'
-
   AmazonSideASN:
     Description: ASN to be used for the Amazon TGW
     Type: String
-
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: quickstart-cisco-meraki-sd-wan-vmx
     Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
-
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Default: implementing/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
-
   QSS3BucketRegion:
     Default: 'us-east-1'
     Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
-
   vMX1InstanceID:
     Description: "The instance ID for the vMX1 instace"
     Type: String
-
   vMX2InstanceID:
     Description: "The instance ID for the vMX1 instace"
     Type: String
-
   SDWANVPCRTID:
     Description: "The instance ID for the SD-WAN VPC route table"
     Type: String
-
+  MerakiOrgID:
+    Description: "The Meraki Org ID to be used for this quickstart"
+    Type: String
   MerakiAPIKey:
-    Description: "The API Key for the Meraki Org"
+    Description: "The API Key for your Meraki Organization"
     Type: String
     NoEcho: 'true'
-
-  MerakiOrgID:
-    Description: "The Meraki Org ID to run the lambda for"
-    Type: String
-
   LambdaRate:
     Description: >
       The rate (frequency) that determines when CloudWatch Events runs the rule that
       triggers the Route Monitor Lambda function.
-    Default: rate(1 minute)
+    Default: rate(10 minutes)
     AllowedValues:
       - rate(1 minute)
       - rate(10 minutes)
@@ -110,7 +97,7 @@ Resources:
     Properties:
       Tags: 
       - Key: Name
-        Value: !Sub ${AWS::StackName}-SDWANrtb
+        Value: !Sub ${AWS::StackName}-SDWANTGWrtb
       TransitGatewayId: !Ref TransitGateway
   
   SdwanRouteTablePropogation:
@@ -149,7 +136,7 @@ Resources:
           Condition: {}
       Path: /
       Policies:
-        - PolicyName: !Sub ${AWS::StackName}-vmxEc2VpnAllow
+        - PolicyName: !Sub ${AWS::StackName}-vmxEc2Policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -173,7 +160,6 @@ Resources:
                   - ec2:DescribeRouteTables
                   - ec2:DescribeInstanceStatus
                 Resource: "*"
-
 
   vMXTransitGatewayRTLambda:
     Type: AWS::Lambda::Function
@@ -259,3 +245,7 @@ Resources:
 Outputs:
   TransitGatewayID:
     Value: !Ref 'TransitGateway'
+  LambdaFunctionID:
+    Value: !Ref 'vMXTransitGatewayRTLambda'
+  TransitGatewaySDWANRouteTable:
+    Value: !Ref 'TransitGatewaySDWANRouteTable'
