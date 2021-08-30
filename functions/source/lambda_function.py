@@ -149,7 +149,9 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
                     DestinationCidrBlock=routes,
                     InstanceId=vmx_id,
                     RouteTableId=rt_id
-                )  
+                )
+                else:
+                    logger.info('VPC RT: Boto exception, adding routes to vpc table failed due to {0}'.format(error.response['Error']['Code'])) 
     else:
         logger.info('VPC RT: No new routes for update') 
 
