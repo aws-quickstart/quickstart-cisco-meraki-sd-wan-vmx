@@ -1,15 +1,21 @@
 // If no preperation is required, remove all content from here
 
 ==== Prepare your AWS account
-* Subscribe the the vMX offering from the AWS Marketplace
+* Subscribe the the vMX offering from the https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&ref_=beagle&applicationId=AWSMPContessa[AWS Marketplace^]
+
 ==== Prepare your {partner-company-name} account
-* Get your Meraki API Key
-* Deploy two vMX networks on your dashboard
-* Set the tags for the vMXs (vMX-1, vMX-2) on the dashboard
-* Configure your branch sites for autovpn and setup the vMXs as the Hubs. 
+* Enable API access to your Meraki Organization by following the steps mentioned https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[here^] 
 
 ==== Prepare for the deployment
-* Get the vMX auth token from the dashboard
+* Deploy two vMX networks on your dashboard. 
+For instructions on how to deploy the vMX networks please refer to the *Meraki Dashboard Configuration* section of the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[vMX Setup Guide for AWS^]
+* For identifying the appropriate vMXs as primary and seconday hubs, we leverage Network Tags. 
+To set the tags for the vMXs (eg. vMX-1 and vMX-2) on the Meraki Dashboard, please refer to the https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags Guide^]
+* Configure your branch sites for autovpn and setup the vMXs as the Hubs. 
+For more information, please refer to the https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting Guide^]
+* Obtain the authentication tokens for the vMXs- After you've added the new vMX to your network, navigate to *Security & SD-WAN > Appliance* status and select “*Generate authentication token”* to generate the token.
 
 === Post deployment steps
-* Manually add customer VPCs
+* This quickstart does not add the workload VPCs to the TGW. Manually adding the customer VPCs post-deployment is required. To do so the following steps are required.
+** Add the workload VPCs as VPC attachments to the TGW
+** Manually, update the SDWAN VPC and the TGW route tables for the workload VPCs
