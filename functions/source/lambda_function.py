@@ -207,18 +207,13 @@ def main(event, context):
         logger.info('Lambda Execution: Got cloud formation delete event {0}'.format(event))
         cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, None)
         return
-    elif 'RequestType' in event and event['RequestType'] == 'Create':
+    elif 'RequestType' in event and (event['RequestType'] == 'Create' or event['RequestType'] == 'Update'):
         logger.info('Lambda Execution: Got cloud formation create event {0}'.format(event))
         # make sure we send a failure to CloudFormation if the function is going to timeout
         timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
         timer.start()
         status = update_rt()
         timer.cancel()
-        cfnresponse.send(event, context, status, {}, None)
-    elif 'RequestType' in event and event['RequestType'] == 'Update':
-        logger.info('Lambda Execution: Got cloud formation create event {0}'.format(event))
-        status = update_rt()
-        logger.info(status)
         cfnresponse.send(event, context, status, {}, None)
     else:
         status = update_rt()
