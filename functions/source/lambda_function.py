@@ -163,61 +163,68 @@ def timeout(event, context):
     cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
 
 def update_rt():
-    try:
-        status = cfnresponse.SUCCESS
-        meraki_api_key = get_meraki_key()
-        meraki_dashboard = meraki.DashboardAPI(meraki_api_key, suppress_logging=True)
-        org_id = ORG_ID
-        #get vmx ids using tags
-        vmxids = get_tagged_networks(meraki_dashboard, org_id)
-        vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
-        # Update TGW routes
-        for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
-        vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
-        vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
-        if vmx1_status == 'online' and vmx2_status == 'online':
-            logger.info('vMX Status: vmx1 and vmx2 are both online')
-            logger.info('VPC RT Update: Updating VPC route table for vMX1')
-            update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
-            logger.info('VPC RT Update: Updating VPC route table for vMX2')
-            update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
-        elif vmx1_status == 'online' and vmx2_status == 'offline':
-            logger.info ("vMX Status: vmx1 online and vmx2 offline, moving all routes to vmx1")
-            logger.info('VPC RT Update: Updating VPC route table for vMX1')
-            update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
-            update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
-        elif vmx1_status == 'offline' and vmx2_status == 'online':
-            logger.info ("vMX Status: vmx2 online and vmx1 offline, moving all routes to vmx2")
-            logger.info('VPC RT Update: Updating VPC route table for vMX2')
-            update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
-            update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
-        else:
-            logger.info ('vMX1 and vMX2 are BOTH offline')
-            #TODO: Cloudwatch enhancement to generate alerts when both vMXs are offline
-    except Exception as e:
-            logging.error('Exception: %s' % e, exc_info=True)
-            status = cfnresponse.FAILED
-
-    return status
-    
+    meraki_api_key = get_meraki_key()
+    meraki_dashboard = meraki.DashboardAPI(meraki_api_key, suppress_logging=True)
+    org_id = ORG_ID
+    #get vmx ids using tags
+    vmxids = get_tagged_networks(meraki_dashboard, org_id)
+    vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
+    # Update TGW routes
+    for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
+    vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
+    vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
+    if vmx1_status == 'online' and vmx2_status == 'online':
+        logger.info('vMX Status: vmx1 and vmx2 are both online')
+        logger.info('VPC RT Update: Updating VPC route table for vMX1')
+        update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
+        logger.info('VPC RT Update: Updating VPC route table for vMX2')
+        update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
+    elif vmx1_status == 'online' and vmx2_status == 'offline':
+        logger.info ("vMX Status: vmx1 online and vmx2 offline, moving all routes to vmx1")
+        logger.info('VPC RT Update: Updating VPC route table for vMX1')
+        update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
+    elif vmx1_status == 'offline' and vmx2_status == 'online':
+        logger.info ("vMX Status: vmx2 online and vmx1 offline, moving all routes to vmx2")
+        logger.info('VPC RT Update: Updating VPC route table for vMX2')
+        update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
+    else:
+        logger.info ('vMX1 and vMX2 are BOTH offline')
+        #TODO: Cloudwatch enhancement to generate alerts when both vMXs are offline
 
 def main(event, context):
-    # No-op if it's a delete request
-    if 'RequestType' in event and event['RequestType'] == 'Delete':
-        logger.info('Lambda Execution: Got cloud formation delete event {0}'.format(event))
-        cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, None)
-        return
-    elif 'RequestType' in event and (event['RequestType'] == 'Create' or event['RequestType'] == 'Update'):
-        logger.info('Lambda Execution: Got cloud formation create event {0}'.format(event))
-        # make sure we send a failure to CloudFormation if the function is going to timeout
+    # This lambda function monitors the state of the vMX instances and updates the SDWAN VPC and TGW route tables accordingly.
+    # The function gets instatiated on two types of events:
+    # 1. Cloudformation Event: On a cloudformation CREATE/UPDATE/DELETE
+    # 2. Cloudwatch Event: Post the cloudformation deployment, this function would periodically run and also get triggered incase of an ec2 instance state change of the vMX instances
+    # To handle both the cases, the main function will check if it's a cloudformation event and in that case, it goes over the first try/except block and finally sends a cfnresponse.
+    # In case it's a cloudwatch event, we call the same update_rt() function but the cfnresponse is not called. 
+
+
+    if 'RequestType' in event and (event['RequestType'] == 'Create' or event['RequestType'] == 'Update' or event['RequestType'] == 'Delete'):
+        status = cfnresponse.SUCCESS
         timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
         timer.start()
-        status = update_rt()
-        timer.cancel()
-        cfnresponse.send(event, context, status, {}, None)
+        try:
+            # No-op if it's a delete request
+            if event['RequestType'] == 'Delete':
+                logger.info('Lambda Execution: Got cloud formation delete event {0}'.format(event))
+            else:
+                logger.info('Lambda Execution: Got cloud formation create/update event {0}'.format(event))
+                update_rt()
+        except Exception as e:
+            logging.error('Exception: %s' % e, exc_info=True)
+            status = cfnresponse.FAILED
+        finally:
+            timer.cancel()
+            cfnresponse.send(event, context, status, {}, None)
     else:
-        status = update_rt()
-        logger.info('Lambda Execution: Executed on event {0} with status {1}'.format(event, status))
-    
+        try:
+            logger.info('Lambda Execution: Executed on event {0}'.format(event))
+            update_rt()
+        except Exception as e:
+            logging.error('Exception: %s' % e, exc_info=True)
+
 if __name__ == "__main__":   
     main('', '')

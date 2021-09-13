@@ -159,10 +159,6 @@ Resources:
                   - ec2:CreateRoute
                   - ec2:GetTransitGatewayRouteTablePropagations
                   - ec2:GetTransitGatewayRouteTableAssociations
-                  - ec2:DescribeInstances
-                  - ec2:DescribeTransitGatewayRouteTables
-                  - ec2:DescribeRouteTables
-                  - ec2:DescribeInstanceStatus
                 Resource: !Sub arn:${AWS::Partition}:ec2:*:*:*
               - Effect: Allow
                 Action:
@@ -172,7 +168,20 @@ Resources:
                   - secretsmanager:GetSecretValue
                   - secretsmanager:GetRandomPassword
                 Resource: !Sub arn:${AWS::Partition}:secretsmanager:*:*:*:*
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeTransitGatewayRouteTables
+                  - ec2:DescribeRouteTables
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeTransitGatewayAttachments
+                Resource: "*"
 
+  vMXTransitGatewayRT:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt 'vMXTransitGatewayRTLambda.Arn'
+ 
   vMXTransitGatewayRTLambda:
     Type: AWS::Lambda::Function
     Properties:
