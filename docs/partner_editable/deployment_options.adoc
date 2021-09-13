@@ -1,6 +1,6 @@
 // Edit this placeholder text to accurately describe your architecture.
 
-This Quick Start provides only one deployment option:
+This Quick Start provides the following deployment option:
 
 * *Deploy {partner-product-short-name} into a new VPC*. This option builds a new AWS environment consisting of the SDWAN VPC, subnets, Internet Gateways, security groups, and other infrastructure components. It then deploys {partner-product-short-name} into this new VPC along with the lambda function.
 

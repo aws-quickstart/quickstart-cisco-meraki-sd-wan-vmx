@@ -5,17 +5,6 @@
 
 ==== Prepare your {partner-company-name} account
 * Enable API access to your Meraki Organization by following the steps mentioned https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[here^] 
-
-==== Prepare for the deployment
-* Deploy two vMX networks on your dashboard. 
-For instructions on how to deploy the vMX networks please refer to the *Meraki Dashboard Configuration* section of the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[vMX Setup Guide for AWS^]
-* For identifying the appropriate vMXs as primary and seconday hubs, we leverage Network Tags. 
-To set the tags for the vMXs (eg. vMX-1 and vMX-2) on the Meraki Dashboard, please refer to the https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags Guide^]
-* Configure your branch sites for autovpn and setup the vMXs as the Hubs. 
-For more information, please refer to the https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting Guide^]
-* Obtain the authentication tokens for the vMXs- After you've added the new vMX to your network, navigate to *Security & SD-WAN > Appliance* status and select “*Generate authentication token”* to generate the token.
-
-=== Post deployment steps
-* This quickstart does not add the workload VPCs to the TGW. Manually adding the customer VPCs post-deployment is required. To do so the following steps are required.
-** Add the workload VPCs as VPC attachments to the TGW
-** Manually, update the SDWAN VPC and the TGW route tables for the workload VPCs
+* Add vMX licenses to the Meraki dashboard. To completed the vMX Meraki dashboard configuration and registration, valid vMX licenses are required.
+If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License[vMX licenses are added^]. 
+If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki reseller or sales representative.

@@ -1,5 +1,5 @@
 This Quick Start supports the following Regions:
 
-* All regions
+* All regions (except Gov Cloud)
 
 //Full list: https://docs.aws.amazon.com/general/latest/gr/rande.html
