@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-   This template deploys two meraki vMX appliances in a VPC in different avalaibility zones. (qs-1s3afc2ta)
+   This template deploys a meraki vMX appliances in a VPC in different avalaibility zones. (qs-1s3afc2ta)
 Parameters:
   InstanceType:
     Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
@@ -14,22 +14,36 @@ Parameters:
   KeyPairName:
     Description: Name of an existing EC2 KeyPair, vMX instances will launch with this key pair
     Type: 'AWS::EC2::KeyPair::KeyName'
-  AvailabilityZone1SubnetID:
+  SubnetID:
     Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
     Type: 'AWS::EC2::Subnet::Id'
-  AvailabilityZone2SubnetID:
-    Description: Subnet ID to be used for the deployment of vMX-2 in Availability Zone 2
-    Type: 'AWS::EC2::Subnet::Id'
-  vMX1Token:
+  vMXToken:
     Description: Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard. 
     Type: String
-  vMX2Token:
-    Description: Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.
+    Default: change_to_match_token_from_dashboard
+  vMXEC2InstanceName:
+    Description: Instance name for vMX1 instance
     Type: String
-  MerakiAPIKey:
-    Description: "The API Key for your Meraki Organization"
+    Default: vMX
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
-    NoEcho: 'true'
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
 
 Mappings:
   AWSVMXAMI:
@@ -75,7 +89,7 @@ Mappings:
       AMI: ami-044eae2d8e3fb2188
 
 Resources:
-  vMX1Instance:
+  vMXInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !FindInMap
@@ -88,53 +102,13 @@ Resources:
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: '0'
-          SubnetId: !Ref 'AvailabilityZone1SubnetID'
+          SubnetId: !Ref 'SubnetID'
       UserData:
-        Fn::Base64: !Ref 'vMX1Token'
+        Fn::Base64: !Ref 'vMXToken'
       Tags:
         - Key: Name
-          Value: !Join
-            - '-'
-            - - !Ref 'AWS::StackName'
-              - vmx-1  
-  vMX2Instance:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: !FindInMap
-        - AWSVMXAMI
-        - !Ref 'AWS::Region'
-        - AMI
-      InstanceType: !Ref 'InstanceType'
-      KeyName: !Ref 'KeyPairName'
-      SourceDestCheck: false
-      NetworkInterfaces:
-        - AssociatePublicIpAddress: true
-          DeviceIndex: '0'
-          SubnetId: !Ref 'AvailabilityZone2SubnetID'
-      UserData:
-        Fn::Base64: !Ref 'vMX2Token'
-      Tags:
-        - Key: Name
-          Value: !Join
-            - '-'
-            - - !Ref 'AWS::StackName'
-              - vmx-2
-  MerakiApiKey:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: MerakiAPIKey
-      Description: This is the API key for the meraki dashboard
-      SecretString: !Sub '{"merakiapikey":"${MerakiAPIKey}" }'
-      Tags:
-        - Key: AppName
-          Value: !Join
-          - '-'
-          - - !Ref 'AWS::StackName'
-            - merakiapikey
+          Value: !Ref 'vMXEC2InstanceName'
 
 Outputs:
-  vMX1InstanceID:
-    Value: !Ref 'vMX1Instance'
-  vMX2InstanceID:
-    Value: !Ref 'vMX2Instance'
-
+  vMXInstanceID:
+    Value: !Ref 'vMXInstance'

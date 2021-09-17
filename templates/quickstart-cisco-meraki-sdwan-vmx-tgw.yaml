@@ -106,6 +106,19 @@ Resources:
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
       TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
   
+  MerakiApiKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: MerakiAPIKey
+      Description: This is the API key for the meraki dashboard
+      SecretString: !Sub '{"merakiapikey":"${MerakiAPIKey}" }'
+      Tags:
+        - Key: AppName
+          Value: !Join
+          - '-'
+          - - !Ref 'AWS::StackName'
+            - merakiapikey
+
   CopyLambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:

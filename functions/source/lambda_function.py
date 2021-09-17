@@ -19,8 +19,6 @@ logger.setLevel(logging.INFO)
 ORG_ID = os.environ['MERAKI_ORG_ID']
 TGW_RT_ID = os.environ['TGW_RT_ID']
 TGW_ATTACH_ID = os.environ['TGW_ATTACH_ID']
-EC2_VMX1_ID = os.environ['VMX1_ID']
-EC2_VMX2_ID = os.environ['VMX2_ID']
 RT_ID = os.environ['RT_ID']
 
 def get_meraki_key():
@@ -158,6 +156,15 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
     else:
         logger.info('VPC RT: No new routes for update') 
 
+def get_instance_id(instance_tag):
+    region = os.environ['AWS_REGION']
+    ec2 = boto3.client('ec2', region_name=region)
+    filters = [{"Name":"tag:Name", "Values":[instance_tag]}]
+    instances = ec2.describe_instances(Filters=filters)
+    instance_id = instances['Reservations'][0]['Instances'][0]['InstanceId']
+
+    return instance_id
+
 def timeout(event, context):
     logging.error('Execution is about to time out, sending failure response to CloudFormation')
     cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
@@ -166,31 +173,37 @@ def update_rt():
     meraki_api_key = get_meraki_key()
     meraki_dashboard = meraki.DashboardAPI(meraki_api_key, suppress_logging=True)
     org_id = ORG_ID
+    vmx1_tag = 'vMX1'
+    vmx2_tag = 'vMX2'
     #get vmx ids using tags
     vmxids = get_tagged_networks(meraki_dashboard, org_id)
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, vmxids[0], vmxids[1])
+    ec2_vmx1_id = get_instance_id(vmx1_tag)
+    ec2_vmx2_id = get_instance_id(vmx2_tag)
     # Update TGW routes
     for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
-    vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], EC2_VMX1_ID)
-    vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], EC2_VMX2_ID)
+    vmx1_status = check_vmx_status(meraki_dashboard, org_id, vmxids[0], ec2_vmx1_id)
+    vmx2_status = check_vmx_status(meraki_dashboard, org_id, vmxids[1], ec2_vmx2_id)
     if vmx1_status == 'online' and vmx2_status == 'online':
         logger.info('vMX Status: vmx1 and vmx2 are both online')
         logger.info('VPC RT Update: Updating VPC route table for vMX1')
-        update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
+        update_vpc_rt(vpn_routes[0], ec2_vmx1_id, RT_ID)
         logger.info('VPC RT Update: Updating VPC route table for vMX2')
-        update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
+        update_vpc_rt(vpn_routes[1], ec2_vmx2_id, RT_ID)
     elif vmx1_status == 'online' and vmx2_status == 'offline':
         logger.info ("vMX Status: vmx1 online and vmx2 offline, moving all routes to vmx1")
         logger.info('VPC RT Update: Updating VPC route table for vMX1')
-        update_vpc_rt(vpn_routes[0], EC2_VMX1_ID, RT_ID)
-        update_vpc_rt(vpn_routes[1], EC2_VMX1_ID, RT_ID)
+        update_vpc_rt(vpn_routes[0], ec2_vmx1_id, RT_ID)
+        update_vpc_rt(vpn_routes[1], ec2_vmx1_id, RT_ID)
     elif vmx1_status == 'offline' and vmx2_status == 'online':
         logger.info ("vMX Status: vmx2 online and vmx1 offline, moving all routes to vmx2")
         logger.info('VPC RT Update: Updating VPC route table for vMX2')
-        update_vpc_rt(vpn_routes[0], EC2_VMX2_ID, RT_ID)
-        update_vpc_rt(vpn_routes[1], EC2_VMX2_ID, RT_ID)
+        update_vpc_rt(vpn_routes[0], ec2_vmx2_id, RT_ID)
+        update_vpc_rt(vpn_routes[1], ec2_vmx2_id, RT_ID)
     else:
         logger.info ('vMX1 and vMX2 are BOTH offline')
+        logger.info('Testing!!')
+        update_vpc_rt(vpn_routes[0], ec2_vmx1_id, RT_ID)
         #TODO: Cloudwatch enhancement to generate alerts when both vMXs are offline
 
 def main(event, context):
