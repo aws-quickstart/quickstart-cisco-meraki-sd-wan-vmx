@@ -1,0 +1,289 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Cisco Meraki- Main Stack- Deploys two vMX instances in different avalaibility zones in an exsisting VPC along with a Transit Gateway. 
+  **WARNING** You will be billed for the AWS resources used if you create a stack from this template. (qs-1s3afc2ri)
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into an existing VPC"
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Meraki configuration
+        Parameters:
+          - MerakiOrgID
+          - MerakiAPIKey
+          - NumberOfvMXs
+          - vMX1Token
+          - vMX2Token
+      - Label:
+          default: Network configuration
+        Parameters:
+          - VpcId
+          - PublicSubnet1Id
+          - PublicSubnet2Id
+          - AmazonSideASN
+          - SDWANRouteTableID
+      - Label:
+          default: EC2 configuration
+        Parameters:
+          - vMX1EC2InstanceName
+          - vMX2EC2InstanceName
+          - InstanceType
+      - Label:
+          default: Lambda configuration
+        Parameters:
+          - LambdaRate
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+    ParameterLabels:
+      KeyPairName:
+        default: SSH key name
+      MerakiOrgID:
+        default: The Meraki Org ID to be used for this quickstart
+      MerakiAPIKey:
+        default: The API Key for your Meraki Organization
+      InstanceType:
+        default: Amazon EC2 instance type for the vMX instances 
+      NumberOfvMXs:
+        default: Number of vMX instances to be deployed
+      vMX1EC2InstanceName:
+        default: Instance name for vMX1 instance
+      vMX2EC2InstanceName:
+        default: Instance name for vMX2 instance
+      vMX1Token:
+        default: Onboarding token to be used for the vMX-1 
+      vMX2Token:
+        default: Onboarding token to be used for the vMX-2 
+      VpcId:
+        default: VPC ID
+      PublicSubnet1Id:
+        default: CIDR block for the public subnet 1
+      PublicSubnet2Id:
+        default: CIDR block for the public subnet 2 
+      SDWANRouteTableID:
+        default: Route table ID for existing SDWAN Route Table
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      AmazonSideASN:
+        default: ASN to be used for the Amazon TGW
+      LambdaRate:
+        default: rate (frequency) for the CloudWatch Events
+Parameters:
+  MerakiOrgID:
+    Description: "The Meraki Org ID to be used for this quickstart"
+    Type: String
+  MerakiAPIKey:
+    Description: "The API Key for your Meraki Organization"
+    Type: String
+    NoEcho: 'true'
+  InstanceType:
+    Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
+    Type: String
+    Default: c5.large
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - m4.large
+    ConstraintDescription: must be a valid EC2 instance type.
+  NumberOfvMXs:
+    Description: Number of vMX instances to be deployed.
+    Type: String
+    AllowedValues:
+      - '1'
+      - '2'
+    Default: '2'
+  vMX1EC2InstanceName:
+    Description: Instance name for vMX1 instance
+    Type: String
+    Default: vMX1
+  vMX2EC2InstanceName:
+    Description: Instance name for vMX2 instance
+    Type: String
+    Default: vMX2
+  vMX1Token:
+    Description: Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard. 
+    Type: String
+    Default: change_to_match_the_token_from_meraki_dashboard
+  vMX2Token:
+    Description: Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.
+    Type: String
+    Default: change_to_match_the_token_from_meraki_dashboard
+  PublicSubnet1Id:
+    Description: ID of the public subnet in Availability Zone 1 of your existing VPC (e.g., subnet-z0376dab).
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet2Id:
+    Description: ID of the public subnet in Availability Zone 2 of your existing VPC (e.g., subnet-a29c3d84).
+    Type: "AWS::EC2::Subnet::Id"
+  VpcId:
+    Description: ID of your existing VPC for deployment (e.g., vpc-0343606e).
+    Type: AWS::EC2::VPC::Id
+  SDWANRouteTableID:
+    Description: ID of your existing VPC Main Route Table.  (e.g., rt-0343606e).
+    Type: AWS::EC2::RouteTable::Id
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  KeyPairName:
+    ConstraintDescription: "Name of an existing EC2 KeyPair, vMX instances will launch with this key pair"
+    Type: "AWS::EC2::KeyPair::KeyName"
+  AmazonSideASN:
+    Description: ASN to be used for the Amazon TGW
+    Type: String
+  LambdaRate:
+    Description: >
+      The rate (frequency) that determines when CloudWatch Events runs the rule that
+      triggers the Lambda function to update the VPC and the TGW route tables. 
+    Default: rate(10 minutes)
+    AllowedValues:
+      - rate(1 minute)
+      - rate(10 minutes)
+      - rate(60 minutes)
+    Type: String
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
+  1vMXCondition: !Or
+    - !Equals
+      - !Ref 'NumberOfvMXs'
+      - '1'
+    - !Condition 2vMXCondition
+  2vMXCondition: !Equals
+    - !Ref 'NumberOfvMXs'
+    - '2'
+Resources:
+  VMX1Stack:
+    Condition: 1vMXCondition 
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-instance.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        InstanceType:
+          Ref: InstanceType
+        KeyPairName:
+          Ref: KeyPairName
+        SubnetID:
+          Ref: PublicSubnet1ID
+        vMXToken:
+          Ref: vMX1Token
+
+  VMX2Stack:
+    Condition: 2vMXCondition 
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-instance.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        InstanceType:
+          Ref: InstanceType
+        KeyPairName:
+          Ref: KeyPairName
+        SubnetID:
+          Ref: PublicSubnet2ID
+        vMXToken:
+          Ref: vMX2Token
+
+  TGWStack:
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-tgw.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AvailabilityZone1SubnetID:
+          Ref: PublicSubnet1ID
+        AvailabilityZone2SubnetID:
+          Ref: PublicSubnet2ID
+        VPCID:
+          Ref: VPCID
+        AmazonSideASN:
+          Ref: AmazonSideASN
+        QSS3BucketName:
+          Ref: QSS3BucketName
+        QSS3KeyPrefix:
+          Ref: QSS3KeyPrefix
+        QSS3BucketRegion:
+          Ref: QSS3BucketRegion
+        vMX1InstanceID:
+          Fn::GetAtt:
+          - VMX1Stack 
+          - Outputs.vMXInstanceID
+        vMX2InstanceID:
+          Fn::GetAtt:
+          - VMX2Stack 
+          - Outputs.vMXInstanceID
+        SDWANVPCRTID:
+          Ref: SDWANRouteTableID
+        MerakiAPIKey:
+          Ref: MerakiAPIKey
+        MerakiOrgID:
+          Ref: MerakiOrgID
+        LambdaRate:
+          Ref: LambdaRate
+        
+Outputs:
+  VPCID:
+    Description: "The ID of the deployed SDWAN VPC"
+    Value: !Ref VPCID
+  vMX1InstanceID:
+    Description: "The instance ID for the vMX1 instace"
+    Value:
+      Fn::GetAtt:
+      - VMX1Stack 
+      - Outputs.vMXInstanceID
+  vMX2InstanceID:
+    Description: "The instance ID for the vMX2 instace"
+    Value:
+      Fn::GetAtt:
+      - VMX2Stack 
+      - Outputs.vMXInstanceID
+  TransitGatewayID:
+    Description: "The instance ID for the Transit Gateway"
+    Value:
+      Fn::GetAtt:
+      - TGWStack
+      - Outputs.TransitGatewayID
+  LambdaID:
+    Description: "The ID for the lambda function"
+    Value:
+      Fn::GetAtt:
+      - TGWStack
+      - Outputs.LambdaFunctionID
+  TGWRouteTable:
+    Description: "Route table for TGW"
+    Value:
+      Fn::GetAtt:
+      - TGWStack
+      - Outputs.TransitGatewaySDWANRouteTable

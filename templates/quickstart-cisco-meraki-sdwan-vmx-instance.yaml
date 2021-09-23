@@ -15,16 +15,12 @@ Parameters:
     Description: Name of an existing EC2 KeyPair, vMX instances will launch with this key pair
     Type: 'AWS::EC2::KeyPair::KeyName'
   SubnetID:
-    Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
+    Description: Subnet ID to be used for the deployment of vMX in an Availability Zone
     Type: 'AWS::EC2::Subnet::Id'
   vMXToken:
-    Description: Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard. 
+    Description: Onboarding token to be used for the vMX. This can be obtained from the Meraki dashboard. 
     Type: String
     Default: change_to_match_token_from_dashboard
-  vMXEC2InstanceName:
-    Description: Instance name for vMX1 instance
-    Type: String
-    Default: vMX
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -41,6 +37,10 @@ Parameters:
     Default: 'us-east-1'
     Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
+  vMXMerakiNetworkTag:
+    Description: Network tag used to identify vMX network for Meraki dashboard.
+    Type: String
+    Default: vMX
 
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
@@ -107,7 +107,12 @@ Resources:
         Fn::Base64: !Ref 'vMXToken'
       Tags:
         - Key: Name
-          Value: !Ref 'vMXEC2InstanceName'
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackId'
+        - Key: MerakiTag
+          Value:
+            Ref: vMXMerakiNetworkTag
 
 Outputs:
   vMXInstanceID:

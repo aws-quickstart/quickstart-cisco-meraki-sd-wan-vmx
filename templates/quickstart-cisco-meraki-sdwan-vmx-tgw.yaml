@@ -46,6 +46,14 @@ Parameters:
     Description: "The API Key for your Meraki Organization"
     Type: String
     NoEcho: 'true'
+  vMX1MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX1 Network on the dashboard
+    Type: String
+    Default: vMX1
+  vMX2MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX2 Network on the dashboard
+    Type: String
+    Default: vMX2
   LambdaRate:
     Description: >
       The rate (frequency) that determines when CloudWatch Events runs the rule that
@@ -106,6 +114,12 @@ Resources:
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
       TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
   
+  SdwanRouteTableAssociation:
+    Type: "AWS::EC2::TransitGatewayRouteTableAssociation"
+    Properties:
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
+
   MerakiApiKey:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -190,11 +204,6 @@ Resources:
                   - ec2:DescribeTransitGatewayAttachments
                 Resource: "*"
 
-  vMXTransitGatewayRT:
-    Type: AWS::CloudFormation::CustomResource
-    Properties:
-      ServiceToken: !GetAtt 'vMXTransitGatewayRTLambda.Arn'
- 
   vMXTransitGatewayRTLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -212,9 +221,9 @@ Resources:
           MERAKI_ORG_ID: !Ref 'MerakiOrgID'
           TGW_RT_ID: !Ref 'TransitGatewaySDWANRouteTable'
           TGW_ATTACH_ID: !Ref 'TransitGatewayAttachment'
-          VMX1_ID: !Ref 'vMX1InstanceID'
-          VMX2_ID: !Ref 'vMX2InstanceID'
           RT_ID: !Ref 'SDWANVPCRTID'
+          vMX1Tag: !Ref 'vMX1MerakiNetworkTag'
+          vMX2Tag: !Ref 'vMX2MerakiNetworkTag'
   
   LambdaSchedulePermission:
     Type: "AWS::Lambda::Permission"
@@ -238,43 +247,6 @@ Resources:
           Id: LambdaSchedule
     DependsOn:
       - vMXTransitGatewayRTLambda
-
-  LambdaEC2Rule:
-    Type: AWS::Events::Rule
-    Properties: 
-      Description: "EventRule to trigger Lambda function on an instance state change for the vMXs"
-      EventPattern: 
-        source: 
-          - "aws.ec2"
-        detail-type: 
-          - "EC2 Instance State-change Notification"
-        detail: 
-          state: 
-            - "stopping"
-            - "stopped"
-            - "terminated"
-            - "shutting-down"
-            - "starting"
-          instance-id:
-            - !Ref 'vMX1InstanceID'
-            - !Ref 'vMX2InstanceID'
-      State: "ENABLED"
-      Targets:
-          - Arn: !Sub ${vMXTransitGatewayRTLambda.Arn}
-            Id: LambdaEC2Rule
-    DependsOn:
-      - vMXTransitGatewayRTLambda
-
-  LambdaEC2SchedulePermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !Sub ${vMXTransitGatewayRTLambda.Arn}
-      Principal: 'events.amazonaws.com'
-      SourceArn: !Sub ${LambdaEC2Rule.Arn}
-    DependsOn:
-      - LambdaEC2Rule
-
 
 Outputs:
   TransitGatewayID:
