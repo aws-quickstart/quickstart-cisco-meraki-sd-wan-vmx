@@ -284,14 +284,6 @@ Resources:
           Ref: QSS3KeyPrefix
         QSS3BucketRegion:
           Ref: QSS3BucketRegion
-        vMX1InstanceID:
-          Fn::GetAtt:
-          - VMX1Stack 
-          - Outputs.vMXInstanceID
-        vMX2InstanceID:
-          Fn::GetAtt:
-          - VMX2Stack 
-          - Outputs.vMXInstanceID
         SDWANVPCRTID:
           Fn::GetAtt:
           - VPCStack 

@@ -16,19 +16,19 @@ Metadata:
           - NumberOfvMXs
           - vMX1Token
           - vMX2Token
+          - vMX1MerakiNetworkTag
+          - vMX2MerakiNetworkTag
       - Label:
           default: Network configuration
         Parameters:
-          - VpcId
-          - PublicSubnet1Id
-          - PublicSubnet2Id
+          - VPCID
+          - AZ1PublicSubnetID
+          - AZ2PublicSubnetID
           - AmazonSideASN
-          - SDWANRouteTableID
+          - VPCRouteTableID
       - Label:
           default: EC2 configuration
         Parameters:
-          - vMX1EC2InstanceName
-          - vMX2EC2InstanceName
           - InstanceType
       - Label:
           default: Lambda configuration
@@ -51,19 +51,19 @@ Metadata:
         default: Amazon EC2 instance type for the vMX instances 
       NumberOfvMXs:
         default: Number of vMX instances to be deployed
-      vMX1EC2InstanceName:
-        default: Instance name for vMX1 instance
-      vMX2EC2InstanceName:
-        default: Instance name for vMX2 instance
+      vMX1MerakiNetworkTag:
+        default: Meraki network Tag for vMX1
+      vMX2MerakiNetworkTag:
+        default: Meraki network Tag for vMX2
       vMX1Token:
         default: Onboarding token to be used for the vMX-1 
       vMX2Token:
         default: Onboarding token to be used for the vMX-2 
-      VpcId:
+      VPCID:
         default: VPC ID
-      PublicSubnet1Id:
+      AZ1PublicSubnetID:
         default: CIDR block for the public subnet 1
-      PublicSubnet2Id:
+      AZ2PublicSubnetID:
         default: CIDR block for the public subnet 2 
       SDWANRouteTableID:
         default: Route table ID for existing SDWAN Route Table
@@ -101,12 +101,12 @@ Parameters:
       - '1'
       - '2'
     Default: '2'
-  vMX1EC2InstanceName:
-    Description: Instance name for vMX1 instance
+  vMX1MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX1 Network on the dashboard
     Type: String
     Default: vMX1
-  vMX2EC2InstanceName:
-    Description: Instance name for vMX2 instance
+  vMX2MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX2 Network on the dashboard
     Type: String
     Default: vMX2
   vMX1Token:
@@ -117,18 +117,18 @@ Parameters:
     Description: Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.
     Type: String
     Default: change_to_match_the_token_from_meraki_dashboard
-  PublicSubnet1Id:
+  AZ1PublicSubnetID:
     Description: ID of the public subnet in Availability Zone 1 of your existing VPC (e.g., subnet-z0376dab).
     Type: "AWS::EC2::Subnet::Id"
-  PublicSubnet2Id:
+  AZ2PublicSubnetID:
     Description: ID of the public subnet in Availability Zone 2 of your existing VPC (e.g., subnet-a29c3d84).
     Type: "AWS::EC2::Subnet::Id"
-  VpcId:
+  VPCID:
     Description: ID of your existing VPC for deployment (e.g., vpc-0343606e).
     Type: AWS::EC2::VPC::Id
-  SDWANRouteTableID:
-    Description: ID of your existing VPC Main Route Table.  (e.g., rt-0343606e).
-    Type: AWS::EC2::RouteTable::Id
+  VPCRouteTableID:
+    Description: ID of your existing VPC's Main Route Table.  (e.g., rt-0343606e).
+    Type: String
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -174,7 +174,6 @@ Conditions:
 Resources:
   VMX1Stack:
     Condition: 1vMXCondition 
-    DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
@@ -188,13 +187,14 @@ Resources:
         KeyPairName:
           Ref: KeyPairName
         SubnetID:
-          Ref: PublicSubnet1ID
+          Ref: AZ1PublicSubnetID
         vMXToken:
           Ref: vMX1Token
+        vMXMerakiNetworkTag:
+          Ref: vMX1MerakiNetworkTag
 
   VMX2Stack:
     Condition: 2vMXCondition 
-    DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
@@ -208,12 +208,13 @@ Resources:
         KeyPairName:
           Ref: KeyPairName
         SubnetID:
-          Ref: PublicSubnet2ID
+          Ref: AZ2PublicSubnetID
         vMXToken:
           Ref: vMX2Token
+        vMXMerakiNetworkTag:
+          Ref: vMX2MerakiNetworkTag
 
   TGWStack:
-    DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
@@ -223,9 +224,9 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         AvailabilityZone1SubnetID:
-          Ref: PublicSubnet1ID
+          Ref: AZ1PublicSubnetID
         AvailabilityZone2SubnetID:
-          Ref: PublicSubnet2ID
+          Ref: AZ2PublicSubnetID
         VPCID:
           Ref: VPCID
         AmazonSideASN:
@@ -236,20 +237,16 @@ Resources:
           Ref: QSS3KeyPrefix
         QSS3BucketRegion:
           Ref: QSS3BucketRegion
-        vMX1InstanceID:
-          Fn::GetAtt:
-          - VMX1Stack 
-          - Outputs.vMXInstanceID
-        vMX2InstanceID:
-          Fn::GetAtt:
-          - VMX2Stack 
-          - Outputs.vMXInstanceID
         SDWANVPCRTID:
-          Ref: SDWANRouteTableID
+          Ref: VPCRouteTableID
         MerakiAPIKey:
           Ref: MerakiAPIKey
         MerakiOrgID:
           Ref: MerakiOrgID
+        vMX1MerakiNetworkTag:
+          Ref: vMX1MerakiNetworkTag
+        vMX2MerakiNetworkTag:
+          Ref: vMX2MerakiNetworkTag
         LambdaRate:
           Ref: LambdaRate
         

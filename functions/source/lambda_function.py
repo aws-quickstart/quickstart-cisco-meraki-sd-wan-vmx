@@ -6,7 +6,6 @@ import botocore
 import logging
 import json
 import sys
-import cfnresponse
 import threading
 
 
@@ -72,7 +71,7 @@ def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
             pass 
     return vpn_routes_vmx1, vpn_routes_vmx2
 
-def get_tagged_networks(dashboard, org_id, vmx_tag):
+def get_meraki_tagged_networks(dashboard, org_id, vmx_tag):
     # executing API call to obtain all Meraki networks in the organization
     organization_networks_response = dashboard.organizations.getOrganizationNetworks(
         org_id, total_pages='all'
@@ -82,23 +81,19 @@ def get_tagged_networks(dashboard, org_id, vmx_tag):
     return vmx_network[0]['id']
 
 def check_vmx_status(dashboard, org_id, vmx_id, ec2_vmx_id):
-    logger.info(vmx_id)
-    logger.info(ec2_vmx_id)
-    logger.info('Checking vMX status for meraki org id {0} and ec2 instance id {1}'.format(vmx_id, ec2_vmx_id))
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region) 
     org_device_status = dashboard.organizations.getOrganizationDevicesStatuses(
         org_id, total_pages='all'
     )
+    logger.info('Checking vMX status for meraki org id {0} and ec2 instance id {1}'.format(vmx_id, ec2_vmx_id))
     meraki_vmx_status = [x for x in org_device_status if str(vmx_id) in str(x['networkId'])][0]['status']
-    if ec2_vmx_id:
-        ec2_vmx_status = ec2.describe_instance_status(InstanceIds=[ec2_vmx_id])
-        if meraki_vmx_status == 'online' and ec2_vmx_status['InstanceStatuses'][0]['InstanceState']['Name'] == 'running':
-            vmx_status = 'online'
-        else:
-            vmx_status ='offline'
+    ec2_vmx_status = ec2.describe_instance_status(InstanceIds=[ec2_vmx_id])
+    if meraki_vmx_status == 'online' and ec2_vmx_status['InstanceStatuses'][0]['InstanceState']['Name'] == 'running':
+        vmx_status = 'online'
     else:
-        vmx_status='offline' 
+        vmx_status ='offline'
+
     return vmx_status
             
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
@@ -160,7 +155,7 @@ def update_vpc_rt(vpn_routes, vmx_id, rt_id):
     else:
         logger.info('VPC RT: No new routes for update') 
 
-def get_instance_id(instance_tag):
+def get_ec2_instance_id(instance_tag):
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region)
     filters = [{"Name":"tag:MerakiTag", "Values":[instance_tag]}]
@@ -169,12 +164,15 @@ def get_instance_id(instance_tag):
     logger.info('AWS EC2: Checking for vMX instances with instance tag {0}'.format(instance_tag))
     for i in instances['Reservations']:
         if i['Instances'][0]['State']['Name'] == 'running':
-            instance_id = i['Instances'][0]['InstanceId']
-            return instance_id
+            instance_id.append(i['Instances'][0]['InstanceId'])
+            logger.info('AWS EC2: Running vMX instance found with tag {0} and instance id {1}'.format(instance_tag, instance_id))
         else:
-            logger.info('AWS EC2: vMX instance found with instance tag {0} but in not running state'.format(instance_tag))
-    print(instance_id) 
-    return instance_id
+            logger.info('AWS EC2: Shutdown/Terminated vMX instance found with instance tag {0} and instance id {1}'.format(instance_tag, i['Instances'][0]['InstanceId']))
+    if len(instance_id) > 1:
+        logger.error('AWS EC2: More that one running instance with the same tag, please remove tag from stale/broken instance')
+        logger.error('AWS EC2: The following instances {0}, were found with the tag {1}'.format(instance_id, instance_tag))
+    else:
+        return instance_id[0]
 
 def update_rt():
     org_id = ORG_ID
@@ -182,16 +180,24 @@ def update_rt():
     vmx2_tag = VMX2_TAG
     meraki_api_key = get_meraki_key()
     meraki_dashboard = meraki.DashboardAPI(meraki_api_key, suppress_logging=True)
-    #get vmx ids using tags
-    ec2_vmx1_id = get_instance_id(vmx1_tag)
-    ec2_vmx2_id = get_instance_id(vmx2_tag)
-    meraki_vmx1_id = get_tagged_networks(meraki_dashboard, org_id, vmx1_tag)
-    meraki_vmx2_id = get_tagged_networks(meraki_dashboard, org_id, vmx2_tag)
+    #get vmx ec2 instance ids using tags
+    ec2_vmx1_id = get_ec2_instance_id(vmx1_tag)
+    ec2_vmx2_id = get_ec2_instance_id(vmx2_tag)
+    #get corresponding vmx network ids using tags
+    meraki_vmx1_id = get_meraki_tagged_networks(meraki_dashboard, org_id, vmx1_tag)
+    meraki_vmx2_id = get_meraki_tagged_networks(meraki_dashboard, org_id, vmx2_tag)
+    #get autovpn branch site routes for the vMXs 
     vpn_routes = get_all_vpn_routes(meraki_dashboard, org_id, meraki_vmx1_id, meraki_vmx2_id)
-    # Update TGW routes
+    ##update TGW routes
     for routes in vpn_routes: update_tgw_rt(routes, TGW_RT_ID, TGW_ATTACH_ID)
-    vmx1_status = check_vmx_status(meraki_dashboard, org_id, meraki_vmx1_id, ec2_vmx1_id)
-    vmx2_status = check_vmx_status(meraki_dashboard, org_id, meraki_vmx2_id, ec2_vmx2_id)
+    ##check vmx status
+    if ec2_vmx1_id and ec2_vmx1_id and meraki_vmx1_id and meraki_vmx1_id:
+        vmx1_status = check_vmx_status(meraki_dashboard, org_id, meraki_vmx1_id, ec2_vmx1_id)
+        vmx2_status = check_vmx_status(meraki_dashboard, org_id, meraki_vmx2_id, ec2_vmx2_id)
+    else:
+        logger.error('vMX Instance Ids: No vMXs instance IDs found')
+        exit
+    #update VPC route tables based on vMX instance state
     if vmx1_status == 'online' and vmx2_status == 'online':
         logger.info('vMX Status: vmx1 and vmx2 are both online')
         logger.info('VPC RT Update: Updating VPC route table for vMX1')
@@ -214,11 +220,7 @@ def update_rt():
 
 def main(event, context):
     # This lambda function monitors the state of the vMX instances and updates the SDWAN VPC and TGW route tables accordingly.
-    # The function gets instatiated on two types of events:
-    # 1. Cloudformation Event: On a cloudformation CREATE/UPDATE/DELETE
-    # 2. Cloudwatch Event: Post the cloudformation deployment, this function would periodically run and also get triggered incase of an ec2 instance state change of the vMX instances
-    # To handle both the cases, the main function will check if it's a cloudformation event and in that case, it goes over the first try/except block and finally sends a cfnresponse.
-    # In case it's a cloudwatch event, we call the same update_rt() function but the cfnresponse is not called. 
+    # The function gets instatiated on a periodic Cloudwatch event, the frequency of the periodic check is configurable and taken as an input for the cft templates. 
 
     try:
         logger.info('Lambda Execution: Executed on event {0}'.format(event))

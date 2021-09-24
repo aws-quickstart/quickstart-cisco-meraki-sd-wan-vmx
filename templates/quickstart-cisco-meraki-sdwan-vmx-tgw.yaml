@@ -30,12 +30,6 @@ Parameters:
     Default: 'us-east-1'
     Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
-  vMX1InstanceID:
-    Description: "The instance ID for the vMX1 instace"
-    Type: String
-  vMX2InstanceID:
-    Description: "The instance ID for the vMX1 instace"
-    Type: String
   SDWANVPCRTID:
     Description: "The instance ID for the SD-WAN VPC route table"
     Type: String

@@ -4,7 +4,7 @@
 * Subscribe the the vMX offering from the https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&ref_=beagle&applicationId=AWSMPContessa[AWS Marketplace^]
 
 ==== Prepare your {partner-company-name} account
-* Enable API access to your Meraki Organization by following the steps mentioned https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[here^] 
+* Get Meraki API Key and Org ID. This Quickstart uses Meraki APIs to monitor the state of the vMXs and fetch AutoVpn routes, enable API access to your Meraki Org by following the steps mentioned https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[here^] 
 * Add vMX licenses to the Meraki dashboard. To completed the vMX Meraki dashboard configuration and registration, valid vMX licenses are required.
 If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License[vMX licenses are added^]. 
 If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki reseller or sales representative.
