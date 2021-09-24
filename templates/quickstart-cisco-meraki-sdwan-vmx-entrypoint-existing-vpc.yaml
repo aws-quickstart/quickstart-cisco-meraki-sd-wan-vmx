@@ -65,7 +65,7 @@ Metadata:
         default: CIDR block for the public subnet 1
       AZ2PublicSubnetID:
         default: CIDR block for the public subnet 2 
-      SDWANRouteTableID:
+      VPCRouteTableID:
         default: Route table ID for existing SDWAN Route Table
       QSS3BucketName:
         default: Quick Start S3 bucket name
