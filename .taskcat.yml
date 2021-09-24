@@ -4,7 +4,7 @@ project:
   - us-east-1
 tests:
   default:
-    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-main.yaml
+    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-entrypoint-new-vpc.yaml
     regions:
     - us-east-1
     parameters:
@@ -20,3 +20,24 @@ tests:
       InstanceType: c5.xlarge
       MerakiAPIKey: "change_me_to_match_your_api_key"
       MerakiOrgID: "change_me_to_match_your_org_name"
+#  exsisting-vpc:
+#    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-entrypoint-existing-vpc.yaml
+#    regions:
+#    - us-east-1
+#    parameters:
+#      AvailabilityZones: "$[taskcat_getaz_2]"
+#      EmailAddress: simarbir.singh@meraki.net
+#      KeyPairName: simar-qs-useast-1
+#      QSS3KeyPrefix: "quickstart-cisco-meraki-sd-wan-vmx/"
+#      QSS3BucketRegion: "$[taskcat_current_region]"
+#      QSS3BucketName: "$[taskcat_autobucket]"
+#      vMX1Token: "change_to_token_generated_from_meraki_dashboard"
+#      vMX2Token: "change_to_token_generated_from_meraki_dashboard"
+#      AmazonSideASN: 65512
+#      InstanceType: c5.xlarge
+#      MerakiAPIKey: "change_me_to_match_your_api_key"
+#      MerakiOrgID: "change_me_to_match_your_org_name"
+#      AZ1PublicSubnetID: subnet-0c2c976ce60f72ef4
+#      AZ2PublicSubnetID: subnet-0172cea346557da7f
+#      VPCID: vpc-0d3d18f2c55f160bf
+#      VPCRouteTableID: rtb-088c07c125f6304fe
