@@ -4,13 +4,13 @@ Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: S3 bucket name can include numbers, lowercase letters,uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Default: aws-quickstart
     Description: Alphanumeric string which identifies the S3 bucket name for the QuickStart assets. It's the bucket to store the copy of the Quick Start assets if you decided to customize or extend them for your own use.
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/._]*$"
     ConstraintDescription: S3 key prefix can include numbers, lowercase letters, uppercaseletters, hyphens (-), and forward slash (/).
-    Default: implementing/
+    Default: quickstart-cisco-meraki-sd-wan-vmx/
     Description: Alphanumeric string which identifies the S3 key prefix used to simulate a folder for your copy of the Quick Start assets if you decided to customize or extend them for your own use.
     Type: String
 Resources:
