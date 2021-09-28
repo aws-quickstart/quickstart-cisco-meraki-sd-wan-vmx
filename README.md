@@ -1,4 +1,3 @@
-
 ## quickstart-cisco-meraki-sd-wan-cisco-meraki-vmx—Quick Start
 
 For architectural details, step-by-step instructions, and customization options, see the [deployment guide](https://aws-quickstart.github.io/quickstart-cisco-meraki-sd-wan-cisco-meraki-vmx/).

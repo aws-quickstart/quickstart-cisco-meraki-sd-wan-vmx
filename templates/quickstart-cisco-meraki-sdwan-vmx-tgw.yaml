@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+   This template deploys a transit gateway in and attaches the SD-WAN vpc to it via VPC attachment (qs-1s3afc2th)
+Parameters:
+  VPCID:
+    Description: 'ID of the VPC (e.g., vpc-0343606e)'
+    Type: 'AWS::EC2::VPC::Id'
+  AvailabilityZone1SubnetID:
+    Description: Subnet ID to be used for the deployment of vMX-1 in Availability Zone 1
+    Type: 'AWS::EC2::Subnet::Id'
+  AvailabilityZone2SubnetID:
+    Description: Subnet ID to be used for the deployment of vMX-2 in Availability Zone 2
+    Type: 'AWS::EC2::Subnet::Id'
+  AmazonSideASN:
+    Description: ASN to be used for the Amazon TGW
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: quickstart-cisco-meraki-sd-wan-vmx/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  SDWANVPCRTID:
+    Description: "The instance ID for the SD-WAN VPC route table"
+    Type: String
+  MerakiOrgID:
+    Description: "The Meraki Org ID to be used for this quickstart"
+    Type: String
+  MerakiAPIKey:
+    Description: "The API Key for your Meraki Organization"
+    Type: String
+    NoEcho: 'true'
+  vMX1MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX1 Network on the dashboard
+    Type: String
+    Default: vMX1
+  vMX2MerakiNetworkTag:
+    Description: Tag used to identify the Meraki vMX2 Network on the dashboard
+    Type: String
+    Default: vMX2
+  LambdaRate:
+    Description: >
+      The rate (frequency) that determines when CloudWatch Events runs the rule that
+      triggers the Route Monitor Lambda function.
+    Default: rate(10 minutes)
+    AllowedValues:
+      - rate(1 minute)
+      - rate(10 minutes)
+      - rate(60 minutes)
+    Type: String
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
+
+Resources:
+  TransitGateway:
+    Type: "AWS::EC2::TransitGateway"
+    Properties:
+      AmazonSideAsn: !Ref 'AmazonSideASN'
+      Description: "Transit Gateway for vMX deployment"
+      AutoAcceptSharedAttachments: "disable"
+      DefaultRouteTableAssociation: "disable"
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - vmx-tgw  
+
+  TransitGatewayAttachment:
+    Type: "AWS::EC2::TransitGatewayAttachment"
+    DependsOn:
+    - TransitGateway
+    Properties:
+      VpcId: !Ref VPCID
+      TransitGatewayId: !Ref TransitGateway
+      SubnetIds:
+      - !Ref AvailabilityZone1SubnetID
+      - !Ref AvailabilityZone2SubnetID
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - vmx-vpc-attach
+
+  TransitGatewaySDWANRouteTable:
+    Type: "AWS::EC2::TransitGatewayRouteTable"
+    Properties:
+      Tags: 
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-SDWANTGWrtb
+      TransitGatewayId: !Ref TransitGateway
+  
+  SdwanRouteTablePropogation:
+    Type: "AWS::EC2::TransitGatewayRouteTablePropagation"
+    Properties:
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
+  
+  SdwanRouteTableAssociation:
+    Type: "AWS::EC2::TransitGatewayRouteTableAssociation"
+    Properties:
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewaySDWANRouteTable
+
+  MerakiApiKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: MerakiAPIKey
+      Description: This is the API key for the meraki dashboard
+      SecretString: !Sub '{"merakiapikey":"${MerakiAPIKey}" }'
+      Tags:
+        - Key: AppName
+          Value: !Join
+          - '-'
+          - - !Ref 'AWS::StackName'
+            - merakiapikey
+
+  CopyLambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 
+        - >-
+          https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/copy-lambdas.yaml
+        - S3Region: !If 
+            - UsingDefaultBucket
+            - !Ref 'AWS::Region'
+            - !Ref QSS3BucketRegion
+          S3Bucket: !If 
+            - UsingDefaultBucket
+            - !Sub '${QSS3BucketName}-${AWS::Region}'
+            - !Ref QSS3BucketName
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  LambdaBasicExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+          Condition: {}
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-vmxEc2Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - ec2:CreateRoute
+                  - ec2:ReplaceRoute
+                  - ec2:CreateTransitGatewayRouteTable
+                  - ec2:ModifyTransitGateway
+                  - ec2:GetTransitGatewayPrefixListReferences
+                  - ec2:ReplaceTransitGatewayRoute
+                  - ec2:CreateTransitGatewayRoute
+                  - ec2:SearchTransitGatewayRoutes
+                  - ec2:CreateRoute
+                  - ec2:GetTransitGatewayRouteTablePropagations
+                  - ec2:GetTransitGatewayRouteTableAssociations
+                Resource: !Sub arn:${AWS::Partition}:ec2:*:*:*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:ListSecretVersionIds
+                  - secretsmanager:GetResourcePolicy
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:GetRandomPassword
+                Resource: !Sub arn:${AWS::Partition}:secretsmanager:*:*:*:*
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeTransitGatewayRouteTables
+                  - ec2:DescribeRouteTables
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeTransitGatewayAttachments
+                Resource: "*"
+
+  vMXTransitGatewayRTLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.main
+      Timeout: 60
+      Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
+      Runtime: python3.7
+      Code:
+        S3Bucket: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
+        S3Key: !Sub "${QSS3KeyPrefix}functions/packages/lambda.zip"
+      MemorySize: 3008
+      Environment:
+        Variables:
+          MERAKI_API_KEY: !Ref 'MerakiAPIKey'
+          MERAKI_ORG_ID: !Ref 'MerakiOrgID'
+          TGW_RT_ID: !Ref 'TransitGatewaySDWANRouteTable'
+          TGW_ATTACH_ID: !Ref 'TransitGatewayAttachment'
+          RT_ID: !Ref 'SDWANVPCRTID'
+          vMX1Tag: !Ref 'vMX1MerakiNetworkTag'
+          vMX2Tag: !Ref 'vMX2MerakiNetworkTag'
+  
+  LambdaSchedulePermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Sub ${vMXTransitGatewayRTLambda.Arn}
+      Principal: 'events.amazonaws.com'
+      SourceArn: !Sub ${LambdaSchedule.Arn}
+    DependsOn:
+      - LambdaSchedule
+
+  LambdaSchedule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: >
+        A schedule for the TGW Route Monitor Lambda function..
+      ScheduleExpression: !Ref LambdaRate
+      State: ENABLED
+      Targets:
+        - Arn: !Sub ${vMXTransitGatewayRTLambda.Arn}
+          Id: LambdaSchedule
+    DependsOn:
+      - vMXTransitGatewayRTLambda
+
+Outputs:
+  TransitGatewayID:
+    Value: !Ref 'TransitGateway'
+  LambdaFunctionID:
+    Value: !Ref 'vMXTransitGatewayRTLambda'
+  TransitGatewaySDWANRouteTable:
+    Value: !Ref 'TransitGatewaySDWANRouteTable'

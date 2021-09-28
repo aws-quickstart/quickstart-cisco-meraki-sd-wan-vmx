@@ -3,12 +3,17 @@
 |Resource |This deployment uses
 
 // Space needed to maintain table headers
-|VPCs |<n>
-|Elastic IP addresses |<n>
-|Security groups |<n>
-|AWS Identity and Access Management (IAM) roles |<n>
-|Auto Scaling groups |<n>
-|Application Load Balancers |<n>
-|Network Load Balancers |<n>
-|<type> instances |<n>
+|VPCs | 1
+|Elastic IP addresses | 2
+|Security groups | 1
+|AWS Identity and Access Management (IAM) roles | 1
+|EC2 instances | 2
+|AWS Lambda Functions | 1 
+|AWS Secrets Manager Secret| 1
+|AWS CloudWatch Event Rules| 2
+|Key Pair | Ensure that at least one Amazon EC2 key pair exists in your AWS account in the Region
+where you plan to deploy the Quick Start. Make note of the key pair name. You need it
+during deployment. To create a key pair, follow the instructions in the AWS
+documentation.
+
 |===

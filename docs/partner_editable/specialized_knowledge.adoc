@@ -3,4 +3,5 @@
 // Include links if helpful. 
 // You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
 
-This Quick Start also assumes familiarity with <knowledge expectations specific to this Quick Start>.
+This Quick Start also assumes familiarity with the Meraki Dashboard and the vMX offering on AWS. For more information, please refer to the 
+https://documentation.meraki.com/Getting_Started[Meraki Getting Started Guide^] and the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX setup guide for AWS^]

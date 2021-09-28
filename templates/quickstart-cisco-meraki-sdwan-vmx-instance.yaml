@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+   This template deploys a meraki vMX appliances in a VPC. (qs-1s3afc2ta)
+Parameters:
+  InstanceType:
+    Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
+    Type: String
+    Default: c5.large
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - m4.large
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyPairName:
+    Description: Name of an existing EC2 KeyPair, vMX instances will launch with this key pair
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  SubnetID:
+    Description: Subnet ID to be used for the deployment of vMX in an Availability Zone
+    Type: 'AWS::EC2::Subnet::Id'
+  vMXToken:
+    Description: Onboarding token to be used for the vMX. This can be obtained from the Meraki dashboard. 
+    Type: String
+    Default: change_to_match_token_from_dashboard
+  vMXMerakiNetworkTag:
+    Description: Network tag used to identify vMX network for Meraki dashboard.
+    Type: String
+    Default: vMX
+Mappings:
+  AWSVMXAMI:
+    us-east-1:
+      AMI: ami-033cdc7addc34de7b
+    us-east-2:
+      AMI: ami-0682f3ca733136feb
+    us-west-1:
+      AMI: ami-09db17cd0ae68ce37
+    us-west-2:
+      AMI: ami-094d363fc83c2d454
+    ca-central-1:
+      AMI: ami-03b6bff67c18fe1a7
+    eu-central-1:
+      AMI: ami-05c87da57bef918fe
+    eu-west-1:
+      AMI: ami-041a9105a7428881e
+    eu-west-2:
+      AMI: ami-07455b0098ec1a0af
+    eu-west-3:
+      AMI: ami-06d223edb947e06f8
+    eu-north-1:
+      AMI: ami-0c47910d707d3d8ff
+    eu-south-1:
+      AMI: ami-03dce7b6bb7e4632d
+    ap-east-1:
+      AMI: ami-07fe0d5e3622aaee0
+    ap-southeast-1:
+      AMI: ami-0649b3dd335cbd849
+    ap-southeast-2:
+      AMI: ami-0e866deec1c0966ce
+    ap-northeast-2:
+      AMI: ami-0eb9c16d27f4ffd0c
+    ap-northeast-1:
+      AMI: ami-08b3370eb3656af21
+    ap-south-1:
+      AMI: ami-00841fc124240e830
+    sa-east-1:
+      AMI: ami-06f0baada2ea0cf76
+    me-south-1:
+      AMI: ami-0bb55407d5a52914e
+    af-south-1:
+      AMI: ami-044eae2d8e3fb2188
+
+Resources:
+  vMXInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - AWSVMXAMI
+        - !Ref 'AWS::Region'
+        - AMI
+      InstanceType: !Ref 'InstanceType'
+      KeyName: !Ref 'KeyPairName'
+      SourceDestCheck: false
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: '0'
+          SubnetId: !Ref 'SubnetID'
+      UserData:
+        Fn::Base64: !Ref 'vMXToken'
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref 'AWS::StackId'
+        - Key: MerakiTag
+          Value:
+            Ref: vMXMerakiNetworkTag
+
+Outputs:
+  vMXInstanceID:
+    Value: !Ref 'vMXInstance'
