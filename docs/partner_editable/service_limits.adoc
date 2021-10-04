@@ -10,7 +10,7 @@
 |EC2 instances | 2
 |AWS Lambda Functions | 1 
 |AWS Secrets Manager Secret| 1
-|AWS CloudWatch Event Rules| 2
+|AWS CloudWatch Event Rules| 1
 |Key Pair | Ensure that at least one Amazon EC2 key pair exists in your AWS account in the Region
 where you plan to deploy the Quick Start. Make note of the key pair name. You need it
 during deployment. To create a key pair, follow the instructions in the AWS

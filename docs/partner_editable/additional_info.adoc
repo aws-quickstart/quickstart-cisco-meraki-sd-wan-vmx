@@ -2,59 +2,32 @@
 //Should any sections not be applicable, remove them
 
 == Post Deployment Steps
-Post-Deployment, the manual addition of the workload VPCs as VPC attachments to the TransitGatewy and updating of the SD-WAN VPC route table for the workload subnets is required.
+Post-Deployment, the addition of the workload VPCs as VPC attachments to the TransitGatewy and updating of the SD-WAN VPC route table for the workload subnets is required. 
+Please, see below for the generic steps for a deployment using a single Transit Gateway and multiple workload VPCs within the same AWS account.
 
-. Add the workload VPCs as VPC attachments to the TGW and associate with the TGW route table
-.. Open the Amazon VPC console at https://console.aws.amazon.com/vpc/
-.. On the navigation pane, choose Transit Gateway Attachments.
-.. Choose Create Transit Gateway Attachment.
-.. For Transit Gateway ID, choose the transit gateway ID that was created as part of this quickstart.
-.. For Attachment type, choose VPC.
-.. Under VPC Attachment, optionally enter a name for Attachment name tag.
-.. For VPC ID, choose the workload VPC to attach to the transit gateway.This VPC must have at least one subnet associated with it.
-.. For Subnet IDs, select one subnet for each Availability Zone to be used by the transit gateway to route traffic. You must select at least one subnet. You can select only one subnet per Availability Zone.
-.. Choose Create attachment. 
-+
-image::../images/aws_tgw_attachment.png[Workload VPC Attachment]
-+
-.. Next, on the navigation pane, choose Transit Gateway Route Tables.
-.. Select the route table created as part of the Quickstart deployment.
-.. In the lower part of the page, choose the Associations tab.
-.. Choose Create association.
-.. Choose the workload VPC attachment to associate and then choose Create association.
-+
-image::../images/vmx_workload_tgw_rt_association.png[Workload VPC TGW RouteTable Association]
-+
-More information about creating Transit Gateway VPC attachments can be found https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[here^]
+. Add the workload VPCs as VPC attachments to the TGW and associate with the TGW route table. Information and about creating Transit Gateway VPC attachments can be found https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[here^]
+. Update VPC Route Tables. Information about VPC Route Tables can be found https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[here^]
 
-. Update VPC Route Tables
-.. Update the SD-WAN VPC route table to point the workload VPC routes to the Transit Gateway
-... Open the Amazon VPC console at https://console.aws.amazon.com/vpc/.
-... In the navigation pane, choose the SD-WAN Route Table, and select the route table.
-... Choose Actions, Edit routes. 
-... To add a route, choose Add route. For Destination enter the destination CIDR block for the workload VPCs (e.g. 10.250.0.0/16), a single IP address, or the ID of a prefix list.
-... For Target, choose a the Transit Gateway deployed as part of this quickstart.
-... Choose Save routes.
-+
-image::../images/vmx_workload_tgw_rt_association.png[Workload VPC RouteTable Update]
-+
-More information about VPC Route Tables can be found https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[here^]
+The above steps might not suffice or there might be additional steps that can be required based on your deployment and setup workflow.
 
-== Recovery Steps
+== vMX HA Architecture
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
-Currently, the vMXs don't support autoscaling. The architecture is made fault tolerant by having two instances in different AZs. 
-Incase of a failure the lambda will handle the updating of routes to the healthy instance. If both instance fail, the failure would be logged and require the following steps. 
+The architecture is made fault tolerant by having two instances in different AZs. The lambda functions handles both an instance level failure by checking the EC2 instance state of the vMX and also software level failures by checking the 
+vMX health state from the Meraki Dashboard. Incase of a vMX instance failure the lambda will detect the failure, log it to cloudwatch and also update the VPC and Transit Gateway routes to point to the healthy instance. 
+For recovering a failed vMX instance, the following steps can be followed. 
 
 . Login to the Meraki dashboard and generate a new Authentication token for the vMX instance. The steps to generate an Authentication token can be found under the link:#_deploy_steps[deployment steps] section
-. Update your Cloudformation stacks with the new authentication token.
-.. In the AWS CloudFormation console, from the list of stacks, select the running stack that you want to update
-.. In the stack details pane, choose Update.
-.. Select the Use Current Template and choose Next
-.. Under Specify Stack details, update the vMX-1 and vMX-2 Tokens
+. Deploy a new vMX stack
+.. Under Specify Stack details, specify the following parameters
+... InstanceType: Choose the same Amazon EC2 instance type that was used before
+... KeyPairName: An existing EC2 KeyPair
+... SubnetID: Select the SubnetID the vMX will be deployed in
+... vMXNetworkTag: Specify the Network Tag associated with the instance on the Meraki dashboard
+... vMXToken: Enter the new Authentication token generated from the Meraki dashboard
 +
-image::../images/cft_update.png[Cloudformation Stack Update]
+image::../images/vmx-stack.png[vMX Stack]
 +
-.. Review the stack information and choose Update Stack
+.. Review the stack information and choose Create stack
 +
 More information about Cloudformation Stack Updates, cane be found https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-direct.html[here^]
 
