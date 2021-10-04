@@ -29,7 +29,7 @@ image::../images/vmx-stack.png[vMX Stack]
 +
 .. Review the stack information and choose Create stack
 +
-More information about Cloudformation Stack Updates, cane be found https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-direct.html[here^]
+More information about Cloudformation, can be found https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/[here^]
 
 == Best practices for using {partner-product-short-name} on AWS
 // Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
