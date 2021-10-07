@@ -6,6 +6,7 @@ Description: >-
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"
+    Order: "1"
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -177,14 +178,6 @@ Parameters:
 
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
-  1vMXCondition: !Or
-    - !Equals
-      - !Ref 'NumberOfvMXs'
-      - '1'
-    - !Condition 2vMXCondition
-  2vMXCondition: !Equals
-    - !Ref 'NumberOfvMXs'
-    - '2'
 
 Resources:
   VPCStack:
@@ -206,69 +199,39 @@ Resources:
         VPCCIDR: !Ref VPCCIDR
         CreatePrivateSubnets: false
 
-  VMX1Stack:
-    Condition: 1vMXCondition 
+  WorkloadStack:
     DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-instance.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-workload.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        MerakiOrgID:
+          Ref: MerakiOrgID
+        MerakiAPIKey:
+          Ref: MerakiAPIKey
         InstanceType:
           Ref: InstanceType
         KeyPairName:
           Ref: KeyPairName
-        SubnetID:
-          Fn::GetAtt:
-          - VPCStack
-          - Outputs.PublicSubnet1ID
-        vMXToken:
+        NumberOfvMXs:
+          Ref: NumberOfvMXs
+        vMX1Token:
           Ref: vMX1Token
-        vMXMerakiNetworkTag:
-          Ref: vMX1MerakiNetworkTag
-
-  VMX2Stack:
-    Condition: 2vMXCondition 
-    DependsOn: VPCStack
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-instance.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        InstanceType:
-          Ref: InstanceType
-        KeyPairName:
-          Ref: KeyPairName
-        SubnetID:
-          Fn::GetAtt:
-          - VPCStack
-          - Outputs.PublicSubnet2ID
-        vMXToken:
+        vMX2Token:
           Ref: vMX2Token
-        vMXMerakiNetworkTag:
+        vMX1MerakiNetworkTag:
+          Ref: vMX1MerakiNetworkTag
+        vMX2MerakiNetworkTag:
           Ref: vMX2MerakiNetworkTag
-
-  TGWStack:
-    DependsOn: VPCStack
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-tgw.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        AvailabilityZone1SubnetID:
+        AZ1PublicSubnetID:
           Fn::GetAtt:
           - VPCStack
-          - Outputs.PublicSubnet1ID
-        AvailabilityZone2SubnetID:
+          - Outputs.PublicSubnet1ID 
+        AZ2PublicSubnetID:
           Fn::GetAtt:
           - VPCStack
           - Outputs.PublicSubnet2ID
@@ -276,28 +239,21 @@ Resources:
           Fn::GetAtt:
           - VPCStack
           - Outputs.VPCID
-        AmazonSideASN:
-          Ref: AmazonSideASN
-        QSS3BucketName:
-          Ref: QSS3BucketName
-        QSS3KeyPrefix:
-          Ref: QSS3KeyPrefix
-        QSS3BucketRegion:
-          Ref: QSS3BucketRegion
-        SDWANVPCRTID:
+        VPCRouteTableID:
           Fn::GetAtt:
           - VPCStack 
           - Outputs.PublicSubnetRouteTable
-        MerakiAPIKey:
-          Ref: MerakiAPIKey
-        MerakiOrgID:
-          Ref: MerakiOrgID
-        vMX1MerakiNetworkTag:
-          Ref: vMX1MerakiNetworkTag
-        vMX2MerakiNetworkTag:
-          Ref: vMX2MerakiNetworkTag
+        AmazonSideASN:
+          Ref: AmazonSideASN
         LambdaRate:
           Ref: LambdaRate
+        QSS3BucketName:
+          Ref: QSS3BucketName
+        QSS3BucketRegion:
+          Ref: QSS3BucketRegion 
+        QSS3KeyPrefix:
+          Ref: QSS3KeyPrefix
+        
 Outputs:
   VPCID:
     Description: "The ID of the deployed SDWAN VPC"
@@ -309,29 +265,29 @@ Outputs:
     Description: "The instance ID for the vMX1 instace"
     Value:
       Fn::GetAtt:
-      - VMX1Stack 
-      - Outputs.vMXInstanceID
+      - WorkloadStack
+      - Outputs.vMX1InstanceID
   vMX2InstanceID:
     Description: "The instance ID for the vMX2 instace"
     Value:
       Fn::GetAtt:
-      - VMX2Stack 
-      - Outputs.vMXInstanceID
+      - WorkloadStack
+      - Outputs.vMX2InstanceID
   TransitGatewayID:
     Description: "The instance ID for the Transit Gateway"
     Value:
       Fn::GetAtt:
-      - TGWStack
+      - WorkloadStack
       - Outputs.TransitGatewayID
   LambdaID:
     Description: "The ID for the lambda function"
     Value:
       Fn::GetAtt:
-      - TGWStack
-      - Outputs.LambdaFunctionID
+      - WorkloadStack
+      - Outputs.LambdaID
   TGWRouteTable:
     Description: "Route table for TGW"
     Value:
       Fn::GetAtt:
-      - TGWStack
-      - Outputs.TransitGatewaySDWANRouteTable
+      - WorkloadStack
+      - Outputs.TGWRouteTable
