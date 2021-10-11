@@ -4,7 +4,7 @@ project:
   - us-east-1
 tests:
   default:
-    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-entrypoint-new-vpc.yaml
+    template: ./templates/quickstart-cisco-meraki-sdwan-vmx-entrypoint-new-vpc.template.yaml
     regions:
     - us-east-1
     parameters:
