@@ -1,0 +1,44 @@
+
+.Meraki configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|The Meraki Org ID to be used for this quickstart
+(`MerakiOrgID`)|`**__Requires input__**`|The Meraki Org ID to be used for this quickstart|The API Key for your Meraki Organization
+(`MerakiAPIKey`)|`**__Requires input__**`|The API Key for your Meraki Organization|Number of vMX instances to be deployed
+(`NumberOfvMXs`)|`2`|Number of vMX instances to be deployed.|Onboarding token to be used for the vMX1
+(`vMX1Token`)|`change_to_match_the_token_from_meraki_dashboard`|Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard.|Onboarding token to be used for the vMX2
+(`vMX2Token`)|`change_to_match_the_token_from_meraki_dashboard`|Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.|Meraki network Tag for vMX1
+(`vMX1MerakiNetworkTag`)|`vMX1`|Tag used to identify the Meraki vMX1 Network on the dashboard|Meraki network Tag for vMX2
+(`vMX2MerakiNetworkTag`)|`vMX2`|Tag used to identify the Meraki vMX2 Network on the dashboard
+|===
+.Network configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Availability Zones to use for the subnets in the SDWAN VPC
+(`AvailabilityZones`)|`**__Requires input__**`|List of Availability Zones to use for the subnets in the SDWAN VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.|CIDR block for the SDWAN VPC
+(`VPCCIDR`)|`10.249.0.0/16`|CIDR block for the SDWAN VPC|CIDR block for the public subnet 1
+(`AvailabilityZone1CIDR`)|`10.249.0.0/24`|CIDR block for the public subnet 1 located in Availability Zone 1|CIDR block for the public subnet 2
+(`AvailabilityZone2CIDR`)|`10.249.1.0/24`|CIDR block for the public subnet 2 located in Availability Zone 2|ASN to be used for the Amazon TGW
+(`AmazonSideASN`)|`**__Requires input__**`|ASN to be used for the Amazon TGW
+|===
+.EC2 configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Amazon EC2 instance type for the vMX instances
+(`InstanceType`)|`c5.large`|Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide.
+|===
+.Lambda configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|rate (frequency) for the CloudWatch Events
+(`LambdaRate`)|`rate(10 minutes)`|The rate (frequency) that determines when CloudWatch Events runs the rule that triggers the Lambda function to update the VPC and the TGW route tables. 
+
+|===
+.AWS Quick Start configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Quick Start S3 bucket name
+(`QSS3BucketName`)|`aws-quickstart`|S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).|Quick Start S3 key prefix
+(`QSS3KeyPrefix`)|`quickstart-cisco-meraki-sd-wan-vmx/`|S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).|Quick Start S3 bucket Region
+(`QSS3BucketRegion`)|`us-east-1`|The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+|===
