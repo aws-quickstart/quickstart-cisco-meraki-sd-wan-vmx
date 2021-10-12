@@ -1,8 +1,8 @@
 // Include details about any licenses and how to sign up. Provide links as appropriate. If no licenses are required, clarify that. The following paragraphs provide examples of details you can provide. Remove italics, and rephrase as appropriate.
 
-The vMX is listed as a Bring Your Own License (BYOL) offer on the AWS Market place. A Meraki vMX – small, medium or large enterprise cloud-management license is required and available in 1, 3, or 5 year durations.
-If you do not have access to a VMX-S, VMX-M or VMX-L license, please work with your https://locatr.cloudapps.cisco.com/WWChannels/LOCATR/openBasicSearch.do[Cisco Partner^] to obtain the vMX license.
-
+The vMX is listed as a Bring Your Own License (BYOL) offer on the AWS Market place. A Meraki vMX – small, medium or large enterprise cloud-management license is required and is available in 1, 3, or 5 year durations.
+If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License[vMX licenses are added^]. 
+If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki https://locatr.cloudapps.cisco.com/WWChannels/LOCATR/openBasicSearch.do[reseller^] or sales representative
 
 The Quick Start requires a subscription to the Amazon Machine Image (AMI) for {partner-product-short-name}, which is available from https://aws.amazon.com/marketplace/[AWS Marketplace^]. 
 Additional pricing, terms, and conditions may apply. For instructions, see the deployment section.

@@ -21,9 +21,7 @@ best practices, to provide you with your own virtual network on AWS.
 * In the SDWAN VPC, a public route table is deployed.
 * In the public subnets:
 ** vMX instances with an internet routable IP are deployed.
-* Two CloudWatch events:
-** A periodic event that is scheduled at fixed time intervals of 1, 10 or 60 mins
-** An event to monitor the EC2 instance state change of the vMX instances
+* A periodic Cloudwatch event that is scheduled at fixed time intervals of 1, 10 or 60 mins
 * In addition a Transit Gateway is deployed to extend connectivity for the Meraki SDWAN fabric to workload resources across different regions.
 ** The SDWAN VPC is attached as a VPC attachment to the Transit Gateway.
 * A lambda function is deployed to monitor the state of the vMXs and update the VPC and the TGW route tables to handle failover and failback.
