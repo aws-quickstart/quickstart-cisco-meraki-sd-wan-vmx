@@ -6,6 +6,7 @@ Description: >-
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into an existing VPC"
+    Order: "2"
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -132,7 +133,7 @@ Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: quickstart-cisco-meraki-sd-wan-vmx
+    Default: aws-quickstart
     Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
   QSS3BucketRegion:
@@ -162,7 +163,7 @@ Parameters:
       - rate(60 minutes)
     Type: String
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'quickstart-cisco-meraki-sd-wan-vmx']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   1vMXCondition: !Or
     - !Equals
       - !Ref 'NumberOfvMXs'
