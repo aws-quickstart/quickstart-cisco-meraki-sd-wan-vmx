@@ -24,9 +24,6 @@ For recovering a failed vMX instance, the following steps can be followed.
 ... SubnetID: Select the SubnetID the vMX will be deployed in
 ... vMXNetworkTag: Specify the Network Tag associated with the instance on the Meraki dashboard
 ... vMXToken: Enter the new Authentication token generated from the Meraki dashboard
-+
-image::../images/vmx-stack.png[vMX Stack]
-+
 .. Review the stack information and choose Create stack
 +
 More information about Cloudformation, can be found https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/[here^]
