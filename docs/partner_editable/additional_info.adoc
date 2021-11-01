@@ -1,34 +1,28 @@
 // Add steps as necessary for accessing the software, post-configuration, and testing. Don’t include full usage instructions for your software, but add links to your product documentation for that information.
 //Should any sections not be applicable, remove them
 
-== Post Deployment Steps
-Post-Deployment, the addition of the workload VPCs as VPC attachments to the TransitGatewy and updating of the SD-WAN VPC route table for the workload subnets is required. 
-Please, see below for the generic steps for a deployment using a single Transit Gateway and multiple workload VPCs within the same AWS account.
+== Postdeployment steps
+After deployment, you must do the following:
 
-. Add the workload VPCs as VPC attachments to the TGW and associate with the TGW route table. Information and about creating Transit Gateway VPC attachments can be found https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[here^]
-. Update VPC Route Tables. Information about VPC Route Tables can be found https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[here^]
+* Attach the workload VPCs to the transit gateway. For more information, see https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[Transit gateway attachments to a VPC^].
+* Update the SD-WAN VCP route table for the workload subnets. For more information, see https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[Add and remove routes from a route table^].
 
-The above steps might not suffice or there might be additional steps that can be required based on your deployment and setup workflow.
-
-== vMX HA Architecture
+== vMX HA architecture
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
-The architecture is made fault tolerant by having two instances in different AZs. The lambda functions handles both an instance level failure by checking the EC2 instance state of the vMX and also software level failures by checking the 
-vMX health state from the Meraki Dashboard. Incase of a vMX instance failure the lambda will detect the failure, log it to cloudwatch and also update the VPC and Transit Gateway routes to point to the healthy instance. 
-For recovering a failed vMX instance, the following steps can be followed. 
+The deployment architecture is fault tolerant, with two instances in different Availability Zones. The AWS Lambda function addresses instance-level failures by checking the EC2 instance state of the vMX. For software-level failures, it checks the vMX health state from the {partner-product-short-name} dashboard. In the case of a vMX instance failure, the AWS Lambda function logs the error in CloudWatch and updates the VPC and transit gateway routes to point to a healthy instance.
 
-. Login to the Meraki dashboard and generate a new Authentication token for the vMX instance. The steps to generate an Authentication token can be found under the link:#_deploy_steps[deployment steps] section
-. Deploy a new vMX stack
-.. Under Specify Stack details, specify the following parameters
-... InstanceType: Choose the same Amazon EC2 instance type that was used before
-... KeyPairName: An existing EC2 KeyPair
-... SubnetID: Select the SubnetID the vMX will be deployed in
-... vMXNetworkTag: Specify the Network Tag associated with the instance on the Meraki dashboard
-... vMXToken: Enter the new Authentication token generated from the Meraki dashboard
-.. Review the stack information and choose Create stack
-+
-More information about Cloudformation, can be found https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/[here^]
+**To recover a failed Meraki vMX instance**
+
+. Log in to the https://dashboard.meraki.com/[Meraki dashboard^].
+. Generate a new authentication token for the failed instance. For more information, see step 4 in the link:#_meraki_dashboard_configuration[Meraki Dashboard Configuration] section, previously in this guide.
+. Deploy a new vMX stack. For deployment links, see link:#_launch_the_quick_start[Launch the Quick Start], previously in this guide. On the *Specify Stack Details* page in the CloudFormation console, specify the following parameters:
+.. **InstanceType.** Choose the same Amazon EC2 instance type that you specified during the previous deployment.
+.. **KeyPairName.** Enter an existing EC2 key pair.
+.. **SubnetID.** Select the SubnetID to deploy the vMX instance.
+.. **vMXNetworkTag.** Specify the network tag associated with the vMX instance on the Meraki dashboard.
+.. **vMXToken.** Enter the new authentication token generated from the Meraki dashboard.
 
 == Best practices for using {partner-product-short-name} on AWS
 // Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
-For vMX deployment best practices please refer to the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[vMX Setup Guide for AWS^]
+For vMX deployment best practices. see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[vMX Setup Guide for Amazon Web Services (AWS)^]
 
