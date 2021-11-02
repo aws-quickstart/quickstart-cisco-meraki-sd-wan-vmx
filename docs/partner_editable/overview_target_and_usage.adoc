@@ -1,15 +1,4 @@
-This guide provides instructions and the Quick Start reference architecture for creating an active/active HA deployment of a redundant pair of Cisco Meraki's virtual MXs with AWS Transit Gateway integration on the AWS Cloud. This requires you to have at least two vMX licences. This is not a warm spare configuration. 
+This guide provides instructions for deploying the {partner-product-short-name} Quick Start reference architecture on the AWS Cloud. It helps IT architects, network administrators, and DevOps engineers deploy an active-active highly available pair of redundant vMX instances.
 
-Customers are increasingly moving towards multi-region deployments in the cloud and require a more dynamic way to connect from branch sites to cloud workloads across different regions. 
-While this can be done using VPC peering across different regions and using static routes, this can quickly become cumbersome and difficult to manage. By using Transit Gateway we can connect multiple workload VPCs via a central hub, this simplifies the network and puts an 
-end to the complexity of managing the different VPC-VPC peering relationships. AWS Transit Gateway routes all traffic to and from each VPC and you have one place to manage and monitor it all. The Transit Gateway acts as a cloud router and each new connection is only made once making the network streamlined and scalable. 
 
-The AWS Cloud infrastructure is global, and is built around Regions and Availability Zones. A Region is a separate geographic area where you can place AWS instances and data. For a current map of AWS Regions, see AWS Global Infrastructure on the AWS website. 
-When you launch this Quick Start, you can choose the AWS Region where you would like to deploy your vMX instances in. Each Region includes multiple Availability Zones, which are isolated locations with one or more discrete data centers—each with redundant power, 
-networking and connectivity, housed in separate facilities. Each vMX is deployed in a different Availability Zone to achieve a highly available architecture. 
 
-The methodology of operation is to deploy a new SD-WAN VPC with the two vMXs deployed in different availability zones in the same region. 
-In-addition a Transit Gateway is deployed to extend connectivity to workload resources across different regions. The SD-WAN VPC is attached to the TGW via a VPC attachment and customers can leverage their existing workflows to connect their workload VPCs to the Transit Gateway. 
-On the Meraki, each vMX is configured as either a primary or a secondary Hub to the branch sites and statically advertises all of the subnets available in Amazon AWS into AutoVPN. An Amazon AWS Lambda script is used to monitor the state of the vMX instances and update the SD-WAN VPC and the Transit Gateway route tables for the AutoVPN routes with the appropriate vMX as the next hop.
-
-This Quick Start is designed for multiple audiences, including IT architects, network administrators, DevOps professionals and existing Meraki customers leveraging the virtual MX in the cloud. 
