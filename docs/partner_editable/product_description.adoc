@@ -1,12 +1,10 @@
 // Replace the content in <>
 // Briefly describe the software. Use consistent and clear branding. 
 // Include the benefits of using the software on AWS, and provide details on usage scenarios.
-Virtual MX (vMX) is a virtual instance of a Meraki security and
-SD-WAN appliance dedicated specifically to providing the simple
-configuration benefits of site-to-site Auto VPN for organizations
-running or migrating IT services to public or private cloud
-environments. An Auto VPN tunnel to a vMX is like having a direct
-Ethernet connection to a private data center.
 
-vMX functions like a VPN concentrator and includes SD-WAN functionality like other MX devices. 
-For instructions on how the vMX works on AWS, please see the Meraki documentation for https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for AWS^]
+
+Meraki MX is an enterprise security and Cisco SD-WAN appliance. Meraki virtual MX (vMX) is a virtualized image of a Meraki MX appliance, deployable in the cloud. This Quick Start deploys an SD-WAN virtual private cloud (VPC) with two Meraki vMX instances, each in a different availability zone (AZ).
+
+https://www.amazonaws.cn/en/transit-gateway/[Amazon Transit Gateway^] is included in the deployment to extend connectivity to workload resources across different Regions. A https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[VPC attachment] is used to link the SD-WAN VPC and transit gateway. You can use your existing workflows and connect your workload VPCs to the transit gateway. Each vMX instance is configured as a primary or secondary hub to the branch sites. The instances advertise the subnets available in AWS to https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN]. An Amazon AWS Lambda script monitors the vMX instances. It updates the SD-WAN VPC and transit gateway route tables with the Auto VPN routes containing the appropriate vMX instance.
+
+For more information see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)^].
