@@ -8,7 +8,7 @@ AWS Cloud.
 
 [#architecture1]
 .Quick Start architecture for {partner-product-short-name} on AWS
-image::../images/architecture_diagram.png[Architecture]
+image::../images/cisco-meraki-sd-wan-vmx-architecture-diagram.png[Architecture]
 
 As shown in <<architecture1>>, the Quick Start sets up the following:
 
@@ -28,3 +28,20 @@ best practices, to provide you with your own virtual network on AWS.
 ** The lambda fetches the auto-vpn routes destined for the vMX hubs from the Meraki Dashboard and updates the SDWAN VPC route table and the TGW route tables.
 ** Monitors the state of the vMX instances and incase of a failure moves all the appropriate routes to the active vMX.
 ** The lambda uses the Meraki API key stored in AWS Secret manager to connect to the Meraki Dashboard and is triggered based on the Cloudwatch events defined above.
+
+
+* A highly available architecture that spans two Availability Zones.
+* A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
+* An internet gateway to direct traffic from the Meraki Auto VPN and Meraki dashboard to Meraki vMX instances in the private subnets.
+* A public route table for the network traffic routes to the public subnets.
+* In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances.*
+* In the private subnets, elastic network interfaces to manage traffic between the VPC and AWS Transit Gateway.
+* Amazon CloudWatch to invoke AWS Lambda in the event of a Meraki vMX instance failure.
+* AWS Lambda to do the following:
+** If a Meraki vMX instance fails, update route table with 
+** Fetch Auto VPN routes to the Meraki vMX instances from the Meraki dashboard.
+** Update the VPC and Transit Gateway route tables. 
+* Transit Gateway to attach to the VPC and extend connectivity to other VPCs in different AWS Regions.
+* AWS Secrets Manager to store a Meraki API key. AWS Lambda uses the API key to access the Meraki dashboard.
+
+[.small]#*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
