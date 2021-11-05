@@ -22,23 +22,13 @@ endif::marketplace_subscription[]
 
 Before deploying the Quick Start, complete the following in the Meraki dashboard.
 
-. Create two new security appliance networks and add the appropriate licenses. For more information, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks[Creating and Deleting Dashboard Networks^]. 
+. Add a vMX license, create a security appliance network, add vMXs to the network, and generate tokens for the vMXs. For more information, see "Meraki Dashboard Configuration" in https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks[vMX Setup Guide for Amazon Web Services (AWS)^].
 
-. Deploy the two vMX instances in your network. For more information, see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[Meraki Dashboard Configuration].
-
-. Choose Security & SD-WAN, then Appliance status. Choose “Generate authentication token”. Enter this token as the `...` parameter in the AWS CloudFormation console during deployment.
+NOTE: Copy and save tokens. You must enter the vMX tokens in the `vMX1Token` and `vMX2Token` parameters in the AWS CloudFormation console during Quick Start deployment.  
 
 . Set network tags `vMX-1` and `vMX-2` to identify vMX nodes as the primary and secondary hub, respectively. To set network tags in the Meraki dashboard, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags^].
 
 . Configure your branch sites as Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting^]
-
-
-==== Generate Authentication Tokens for the vMXs
-
-After you've added the new vMX to your network, navigate to Security & SD-WAN > Appliance status and select “Generate authentication token” to generate the token. This token would be used as an input parameter for the Quickstart templates.
-+
-image::../images/vmx_auth_token.png[vMX Auth Token]
-image::../images/vmx_auth_token_2.png[vMX Auth Token-2]
 
 
 === Launch the Quick Start
