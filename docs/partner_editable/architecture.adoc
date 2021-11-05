@@ -15,12 +15,12 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 * A highly available architecture that spans two Availability Zones.*
 * A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * An internet gateway connecting the VPC to the internet.
-* A public route table to specify routing rules for inbound internet traffic and a local route for communication within the VPC.
+* A public route table to specify routing rules for inbound internet traffic.
 * In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances, configured as hubs in the Meraki VPN network.
 * In the private subnets, elastic network interfaces to enable traffic routing from all subnets in the AZ to Transit Gateway. 
 * Amazon CloudWatch to invoke AWS Lambda if a Meraki vMX instance fails.
-* AWS Lambda to update route tables in the VPC and Transit Gateway after a failover or failback event. 
-* Transit Gateway to attach to the VPC and provide a transit gateway route table associated with it. This enables connectivity to attached workload VPCs in other AWS Regions. 
+* AWS Lambda to update route tables during failover or failback events. 
+* Transit Gateway attached to the VPC, enabling connectivity to workload VPCs in other AWS Regions using a Transit Gateway route table. 
 * AWS Secrets Manager to store a Meraki API key. AWS Lambda uses the API key to access the Meraki dashboard when updating route tables.
 
 [.small]#*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#

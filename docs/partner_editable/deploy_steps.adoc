@@ -20,29 +20,15 @@ endif::marketplace_subscription[]
 
 === Meraki Dashboard Configuration
 
-. *Deploy the vMX Nodes*: First we need to generate two vMX nodes inside the Meraki dashboard which we will then instantiate on AWS.  Begin by creating two new Security Appliance network in your organization. This https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks[guide^] will walk you through creating a new network in the Meraki Dashboard.
-Once you have created the network and added the appropriate license you will be able to deploy a new vMX instance in your network by navigating to Security & SD-WAN > Appliance Status and clicking on the relevant 'Add VMX' button on your Meraki dashboard.
-+
-image::../images/vmx_license.png[vMX License]
-+
-For more details, please refer to the *Meraki Dashboard Configuration* section of the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration[vMX Setup Guide for AWS^]
+Before deploying the Quick Start, complete the following in the Meraki dashboard.
 
-. *Deploy Network Tags*: For identifying the appropriate vMXs as primary and seconday hubs, we leverage Network Tags. vMX-1 is is used to identify the primary hub and vMX-2 tag is used to identify the secondary Hub. To set the network tags for the vMXs, navigate to the Organization > Overview page and select the checkbox next to the network that you wish to tag. Below is a snippet of the Meraki Dashboard Overview page:
-+
-image::../images/vmx_tags.png[vMX Tags]
-+
-For more information about Network Tags, please refer to the https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags Guide^]
+. Add a vMX license, create a security appliance network, add vMXs to the network, and generate tokens for the vMXs. For more information, see "Meraki Dashboard Configuration" in https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks[vMX Setup Guide for Amazon Web Services (AWS)^].
 
-. *Branch Site Configuration*: Navigate to Security & SD-WAN > Configure > Site-to-Site page on the Meraki Dashboard and configure your branch sites as autovpn spokes with the vMXs as the primary and secondary hubs.
-+
-image::../images/meraki_autovpn.png[AutoVPN Configuration]
-+
-For more information, please refer to the https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting Guide^]
+NOTE: Copy and save tokens. You must enter the vMX tokens in the `vMX1Token` and `vMX2Token` parameters in the AWS CloudFormation console during Quick Start deployment.  
 
-. *Generate Authentication Tokens for the vMXs*: After you've added the new vMX to your network, navigate to Security & SD-WAN > Appliance status and select “Generate authentication token” to generate the token. This token would be used as an input parameter for the Quickstart templates.
-+
-image::../images/vmx_auth_token.png[vMX Auth Token]
-image::../images/vmx_auth_token_2.png[vMX Auth Token-2]
+. Set network tags `vMX-1` and `vMX-2` to identify vMX nodes as the primary and secondary hub, respectively. To set network tags in the Meraki dashboard, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags^].
+
+. Configure your branch sites as Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting^]
 
 
 === Launch the Quick Start
@@ -52,11 +38,11 @@ Each deployment takes about {deployment_time} to complete.
 +
 [cols="3,1"]
 |===
-^|http://qs_launch_permalink[Deploy {partner-product-short-name} into a SDWAN VPC on AWS^]
-^|http://qs_template_permalink[View template^]
+^|https://fwd.aws/6aN9v?[Deploy {partner-product-short-name} into a SDWAN VPC on AWS^]
+^|https://fwd.aws/BEEnM?[View template^]
 
-^|http://qs_launch_permalink[Deploy {partner-product-short-name} into an existing SDWAN VPC on AWS^]
-^|http://qs_template_permalink[View template^]
+^|https://fwd.aws/JnvKq?[Deploy {partner-product-short-name} into an existing SDWAN VPC on AWS^]
+^|https://fwd.aws/Byq3z?[View template^]
 
 |===
 +
