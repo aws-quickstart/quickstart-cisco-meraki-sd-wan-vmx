@@ -21,7 +21,8 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 * A transit gateway route table associated with the VPC for routing rules to Transit Gateway.
 * Transit Gateway attached to the VPC, enabling connectivity to attached workload VPCs in other AWS Regions.
 * CloudWatch to invoke AWS Lambda if a Meraki vMX instance fails.
-* AWS Lambda to update route tables during failover or failback events.
+* AWS Lambda to monitor the state of the vMX instances. If an instance fails, AWS Lambda updates route tables to point to a healthy instance and logs the event in CloudWatch.
+* CloudWatch to collect logs of vMX instance performance.
 * AWS Secrets Manager to store a Meraki API key. AWS Lambda uses the API key to access the Meraki dashboard when updating route tables.
 
 [.small]#*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#

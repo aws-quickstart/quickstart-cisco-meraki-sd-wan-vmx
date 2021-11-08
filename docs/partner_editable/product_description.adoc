@@ -2,9 +2,6 @@
 // Briefly describe the software. Use consistent and clear branding. 
 // Include the benefits of using the software on AWS, and provide details on usage scenarios.
 
+This Quick Start deploys https://meraki.cisco.com/products/security-sd-wan/[Cisco Meraki Virtual MX (vMX)^] on the Amazon Web Services (AWS) Cloud. It helps IT personnel connect branch software-defined wide area network (SD-WAN) deployments to applications on AWS. 
 
-Meraki virtual MX (vMX) is a virtualized image of a Meraki MX enterprise security and Cisco SD-WAN appliance, deployable in the cloud. This Quick Start deploys an SD-WAN virtual private cloud (VPC) with two Meraki vMX instances, each in a different availability zone (AZ).
-
-https://www.amazonaws.cn/en/transit-gateway/[Amazon Transit Gateway^] is included in the deployment to extend connectivity to workload resources across different Regions. A https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[VPC attachment] is used to link the SD-WAN VPC and transit gateway. You can use your existing workflows and connect your workload VPCs to the transit gateway. Each vMX instance is configured as a primary or secondary hub to the Meraki branch sites. The instances advertise the subnets available in AWS to https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN]. An Amazon AWS Lambda script monitors the vMX instances. It updates the SD-WAN VPC and transit gateway route tables with the Auto VPN routes containing the appropriate vMX instance.
-
-For more information see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)^].
+The Quick Start deploys an active-active cluster of two vMX instances in the private subnets of a virtual private cloud (VPC). https://aws.amazon.com/lambda/[AWS Lambda^] provides high-availability failover support and logs events in https://aws.amazon.com/cloudwatch/[Amazon CloudWatch^]. VPC attachment to https://aws.amazon.com/transit-gateway/?whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc[AWS Transit Gateway^] extends connectivity to attached VPCs in other AWS Regions. 
