@@ -8,9 +8,9 @@
 |Security groups | 1
 |AWS Identity and Access Management (IAM) roles | 1
 |EC2 instances | 2
-|AWS Lambda Functions | 1 
-|AWS Secrets Manager Secret| 1
-|AWS CloudWatch Event Rules| 1
-|EC2 Key Pair | 1
+|AWS Lambda functions | 1 
+|AWS Secrets Manager secrets| 1
+|CloudWatch event rules| 1
+|EC2 key pairs | 1
 
 |===
