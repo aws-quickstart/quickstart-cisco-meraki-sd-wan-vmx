@@ -21,8 +21,8 @@
 :parameters_as_appendix:
 // Uncomment the following two attributes if you are using an AWS Marketplace listing.
 // Additional content will be generated automatically based on these attributes.
-// :marketplace_subscription:
-// :marketplace_listing_url: https://example.com/
+:marketplace_subscription: Cisco Meraki vMX
+:marketplace_listing_url: https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk
 // Uncomment the following attribute to add a statement about AWS and our stance on compliance-related Quick Starts. 
 // :compliance-statement: Deploying this Quick Start does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations.  
 // Uncomment the following attribute if you are deploying a CDK Quick Start. Make sure to comment out :parameters_as_appendix: also.
