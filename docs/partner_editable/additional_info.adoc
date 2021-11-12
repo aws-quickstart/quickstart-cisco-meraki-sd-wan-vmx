@@ -16,11 +16,11 @@ The deployment architecture is fault tolerant with two vMX instances in differen
 . Sign in to the https://dashboard.meraki.com/[Meraki dashboard^].
 . Generate a new authentication token for the failed instance. For more information, see step 4 in the link:#_meraki_dashboard_configuration[Meraki Dashboard Configuration] section, previously in this guide.
 . Deploy a new vMX stack. For deployment links, see link:#_launch_the_quick_start[Launch the Quick Start], previously in this guide. On the *Specify Stack Details* page in the CloudFormation console, specify the following parameters:
-.. **InstanceType.** Choose the same Amazon EC2 instance type that you specified during the previous deployment.
-.. **KeyPairName.** Enter an existing EC2 key pair.
-.. **SubnetID.** Select the SubnetID to deploy the vMX instance.
-.. **vMXNetworkTag.** Specify the network tag associated with the vMX instance on the Meraki dashboard.
-.. **vMXToken.** Enter the new authentication token generated from the Meraki dashboard.
+** `InstanceType`. Choose the same Amazon EC2 instance type that you specified during the previous deployment.
+** `KeyPairName`. Enter the name of an existing EC2 key pair.
+** `SubnetID`. Select the SubnetID to deploy the vMX instance.
+** `vMXNetworkTag`. Specify the network tag associated with the vMX instance on the Meraki dashboard.
+** `vMXToken`. Enter the new authentication token generated from the Meraki dashboard.
 
 == Best practices for using {partner-product-short-name} on AWS
 // Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
