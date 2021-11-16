@@ -41,6 +41,7 @@ Metadata:
           - QSS3BucketName
           - QSS3KeyPrefix
           - QSS3BucketRegion
+          - KeyPairName
     ParameterLabels:
       KeyPairName:
         default: Key pair name
@@ -108,11 +109,11 @@ Parameters:
   vMX1Token:
     Description: Onboarding token for the first vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
-    Default: Token must match the one on the Meraki dashboard.
+    Default: change_to_match_the_token_from_meraki_dashboard
   vMX2Token:
     Description: Onboarding token for the second vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
-    Default: Token must match the one on the Meraki dashboard.
+    Default: change_to_match_the_token_from_meraki_dashboard
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form `x.x.x.x/16-28`.
