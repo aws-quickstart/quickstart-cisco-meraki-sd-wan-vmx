@@ -2,6 +2,14 @@
 // Briefly describe the software. Use consistent and clear branding. 
 // Include the benefits of using the software on AWS, and provide details on usage scenarios.
 
-This Quick Start deploys https://meraki.cisco.com/products/security-sd-wan/[Cisco Meraki Virtual MX (vMX)^] on the Amazon Web Services (AWS) Cloud. It helps IT personnel connect branch software-defined wide area network (SD-WAN) deployments to applications on AWS. 
+This Quick Start deploys https://meraki.cisco.com/products/security-sd-wan/[Cisco Meraki Virtual MX (vMX)^] on the Amazon Web Services (AWS) Cloud. It helps IT personnel extend software-defined wide area network (SD-WAN) networks from branch offices to applications running on AWS. 
+
+SD-WAN branches connect with cloud-hosted applications in a hub and spoke topology, with the SD-WAN overlay traffic terminating on shared SD-WAN virtual private clouds (VPCs) that host redundant Cisco SD-WAN cloud routers. In this deployment, AWS Transit Gateway acts as a cloud router, enabling you to scale connectivity across thousands of Amazon VPCs, AWS accounts, and on-premises networks to a single gateway. 
+
+
+Securely connect branch sites with a physical MX appliance to resources on the AWS Cloud.
+
+
+
 
 The Quick Start deploys an active-active cluster of two vMX instances in the private subnets of a virtual private cloud (VPC). https://aws.amazon.com/lambda/[AWS Lambda^] provides high-availability failover support and logs events in https://aws.amazon.com/cloudwatch/[Amazon CloudWatch^]. VPC attachment to https://aws.amazon.com/transit-gateway/?whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc[AWS Transit Gateway^] extends connectivity to attached VPCs in other AWS Regions. 
