@@ -1,9 +1,10 @@
 // If no preperation is required, remove all content from here
 
 ==== Prepare your AWS account
-* Subscribe the the vMX offering from the https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&ref_=beagle&applicationId=AWSMPContessa[AWS Marketplace^]
+* Subscribe to Cisco Meraki vMX on https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&ref_=beagle&applicationId=AWSMPContessa[AMI Marketplace].
 
 ==== Prepare your {partner-company-name} account
-* Enable API access to your Meraki Organization by following the steps mentioned https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[here^] 
-* Add vMX licenses to the Meraki dashboard by following the steps mentioned https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License[here^].
-For more information on how to obtain licenses, refer to link:#_licenses[Software Licenses]
+* Enable API access to your Meraki organization. For more information, see https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API[Cisco Meraki Dashboard API^]. 
+* Add vMX licenses to the Meraki dashboard. For more information, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License[Add Another License^].
+
+For more information on how to obtain licenses, see link:#_licenses[Software licenses], previously in this guide.

@@ -32,7 +32,7 @@ Metadata:
         Parameters:
           - InstanceType
       - Label:
-          default: Lambda configuration
+          default: AWS Lambda configuration
         Parameters:
           - LambdaRate
       - Label:
@@ -41,33 +41,34 @@ Metadata:
           - QSS3BucketName
           - QSS3KeyPrefix
           - QSS3BucketRegion
+          - KeyPairName
     ParameterLabels:
       KeyPairName:
-        default: SSH key name
+        default: Key pair name
       MerakiOrgID:
-        default: The Meraki Org ID to be used for this quickstart
+        default: Meraki organization ID
       MerakiAPIKey:
-        default: The API Key for your Meraki Organization
+        default: Meraki organization API key
       InstanceType:
-        default: Amazon EC2 instance type for the vMX instances 
+        default: Amazon EC2 instance type 
       NumberOfvMXs:
-        default: Number of vMX instances to be deployed
+        default: Number of vMX instances
       vMX1MerakiNetworkTag:
-        default: Meraki network Tag for vMX1
+        default: Meraki network tag, first vMX instance
       vMX2MerakiNetworkTag:
-        default: Meraki network Tag for vMX2
+        default: Meraki network tag, second vMX instance
       vMX1Token:
-        default: Onboarding token to be used for the vMX-1 
+        default: Authentication token, first vMX instance 
       vMX2Token:
-        default: Onboarding token to be used for the vMX-2 
+        default: Authentication token, second vMX instance
       VPCID:
         default: VPC ID
-      AZ1PublicSubnetID:
-        default: CIDR block for the public subnet 1
-      AZ2PublicSubnetID:
-        default: CIDR block for the public subnet 2 
+      AvailabilityZone1CIDR:
+        default: CIDR block for public subnet 1 
+      AvailabilityZone2CIDR:
+        default: CIDR block for public subnet 2 
       VPCRouteTableID:
-        default: Route table ID for existing SDWAN Route Table
+        default: Existing VPC route table ID
       QSS3BucketName:
         default: Quick Start S3 bucket name
       QSS3BucketRegion:
@@ -75,87 +76,109 @@ Metadata:
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
       AmazonSideASN:
-        default: ASN to be used for the Amazon TGW
+        default: Transit gateway ASN
       LambdaRate:
-        default: rate (frequency) for the CloudWatch Events
+        default: CloudWatch Events rule rate
 Parameters:
   MerakiOrgID:
-    Description: "The Meraki Org ID to be used for this quickstart"
+    Description: Meraki organization ID.
     Type: String
   MerakiAPIKey:
-    Description: "The API Key for your Meraki Organization"
+    Description: Meraki organization API key.
     Type: String
     NoEcho: 'true'
   InstanceType:
-    Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
+    Description: Amazon EC2 instance type for the vMX instances. For recommended and supported instance types, see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)]. 
     Type: String
     Default: c5.large
     AllowedValues:
       - c5.large
       - c5.xlarge
       - m4.large
-    ConstraintDescription: must be a valid EC2 instance type.
+    ConstraintDescription: Must be a valid EC2 instance type.
   NumberOfvMXs:
-    Description: Number of vMX instances to be deployed.
+    Description: Number of vMX instances to deploy.
     Type: String
     AllowedValues:
       - '1'
       - '2'
     Default: '2'
   vMX1MerakiNetworkTag:
-    Description: Tag used to identify the Meraki vMX1 Network on the dashboard
+    Description: On the Meraki dashboard, the vMX network tag for the first vMX instance.
     Type: String
     Default: vMX1
   vMX2MerakiNetworkTag:
-    Description: Tag used to identify the Meraki vMX2 Network on the dashboard
+    Description: On the Meraki dashboard, the vMX network tag for the second vMX instance.
     Type: String
     Default: vMX2
   vMX1Token:
-    Description: Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard. 
+    Description: Onboarding token for the first vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
     Default: change_to_match_the_token_from_meraki_dashboard
   vMX2Token:
-    Description: Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.
+    Description: Onboarding token for the second vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
     Default: change_to_match_the_token_from_meraki_dashboard
   AZ1PublicSubnetID:
-    Description: ID of the public subnet in Availability Zone 1 of your existing VPC (e.g., subnet-z0376dab).
+    Description: ID of the public subnet in Availability Zone 1 of the existing VPC (e.g., `subnet-z0376dab`).
     Type: "AWS::EC2::Subnet::Id"
   AZ2PublicSubnetID:
-    Description: ID of the public subnet in Availability Zone 2 of your existing VPC (e.g., subnet-a29c3d84).
+    Description: ID of the public subnet in Availability Zone 2 of the existing VPC (e.g., `subnet-a29c3d84`).
     Type: "AWS::EC2::Subnet::Id"
   VPCID:
-    Description: ID of your existing VPC for deployment (e.g., vpc-0343606e).
+    Description: ID of the existing VPC for deployment (e.g., `vpc-0343606e`).
     Type: AWS::EC2::VPC::Id
   VPCRouteTableID:
-    Description: ID of your existing VPC's Main Route Table.  (e.g., rt-0343606e).
+    Description: ID of the existing VPC main route table (e.g., `rt-0343606e`).
     Type: String
   QSS3BucketName:
-    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+    ConstraintDescription:
+      The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a 
+      hyphen (-).
     Default: aws-quickstart
-    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Description:
+      Name of the S3 bucket for your copy of the Quick Start assets. 
+      Keep the default name unless you are customizing the template. 
+      Changing the name updates code references to point to a new Quick 
+      Start location. This name can include numbers, lowercase letters, 
+      uppercase letters, and hyphens, but do not start or end with a hyphen (-). 
+      See https://aws-quickstart.github.io/option1.html.
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
-    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Description: 'AWS Region where the Quick Start S3 bucket (QSS3BucketName) is 
+    hosted. Keep the default Region unless you are customizing the template. 
+    Changing this Region updates code references to point to a new Quick Start location. 
+    When using your own bucket, specify the Region. 
+    See https://aws-quickstart.github.io/option1.html.'
     Type: String
   QSS3KeyPrefix:
-    AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    AllowedPattern: '^[0-9a-zA-Z-/]*$'
+    ConstraintDescription:
+      The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/). The prefix should
+      end with a forward slash (/).
     Default: quickstart-cisco-meraki-sd-wan-vmx/
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Description:
+      S3 key prefix that is used to simulate a directory for your copy of the 
+      Quick Start assets. Keep the default prefix unless you are customizing 
+      the template. Changing this prefix updates code references to point to 
+      a new Quick Start location. This prefix can include numbers, lowercase 
+      letters, uppercase letters, hyphens (-), and forward slashes (/). End with 
+      a forward slash. See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html 
+      and https://aws-quickstart.github.io/option1.html.
     Type: String
   KeyPairName:
-    ConstraintDescription: "Name of an existing EC2 KeyPair, vMX instances will launch with this key pair"
+    Description: EC2 key pair name.
+    ConstraintDescription: Must be the name of an existing EC2 key pair. vMX instances launch with this key pair.
     Type: "AWS::EC2::KeyPair::KeyName"
   AmazonSideASN:
-    Description: ASN to be used for the Amazon TGW
+    Description: Autonomous System Number (ASN) for the transit gateway.
     Type: String
   LambdaRate:
-    Description: >
-      The rate (frequency) that determines when CloudWatch Events runs the rule that
-      triggers the Lambda function to update the VPC and the TGW route tables. 
+    Description: How often the CloudWatch Events rule runs. The rule invokes AWS Lambda to update the VPC and transit gateway route tables.  
     Default: rate(10 minutes)
     AllowedValues:
       - rate(1 minute)
@@ -253,35 +276,38 @@ Resources:
         
 Outputs:
   VPCID:
-    Description: "The ID of the deployed SDWAN VPC"
+    Description: The ID of the deployed SD-WAN VPC.
     Value: !Ref VPCID
   vMX1InstanceID:
-    Description: "The instance ID for the vMX1 instace"
+    Description: First vMX instance ID.
     Value:
       Fn::GetAtt:
       - VMX1Stack 
       - Outputs.vMXInstanceID
   vMX2InstanceID:
-    Description: "The instance ID for the vMX2 instace"
+    Description: Second vMX instance ID.
     Value:
       Fn::GetAtt:
       - VMX2Stack 
       - Outputs.vMXInstanceID
   TransitGatewayID:
-    Description: "The instance ID for the Transit Gateway"
+    Description: Transit gateway instance ID.
     Value:
       Fn::GetAtt:
       - TGWStack
       - Outputs.TransitGatewayID
   LambdaID:
-    Description: "The ID for the lambda function"
+    Description: AWS Lambda function ID.
     Value:
       Fn::GetAtt:
       - TGWStack
       - Outputs.LambdaFunctionID
   TGWRouteTable:
-    Description: "Route table for TGW"
+    Description: Transit gateway route table.
     Value:
       Fn::GetAtt:
       - TGWStack
       - Outputs.TransitGatewaySDWANRouteTable
+  Postdeployment:
+    Description: See the deployment guide for postdeployment steps.
+    Value: https://aws.amazon.com/quickstart/?quickstart-all.sort-by=item.additionalFields.s
