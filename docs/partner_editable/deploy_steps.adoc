@@ -20,16 +20,13 @@ endif::marketplace_subscription[]
 
 === Meraki dashboard configuration
 
-Before deploying the Quick Start, complete the following in the Meraki dashboard.
+Before deploying the Quick Start, do the following:
 
-. Add a vMX license, create a security appliance network, add vMXs to the network, and generate tokens for the vMXs. For more information, see "Meraki Dashboard Configuration" in https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks[vMX Setup Guide for Amazon Web Services (AWS)^].
+. Complete the instructions in the "Meraki Dashboard Configuration" section of the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)^]. During configuration, you generate authentication tokens for the vMX appliances. Copy and save the tokens. You must enter them in the `vMX1Token` and `vMX2Token` parameters in the AWS CloudFormation console during Quick Start deployment.  
 
-NOTE: Copy and save tokens. You must enter the vMX tokens in the `vMX1Token` and `vMX2Token` parameters in the AWS CloudFormation console during Quick Start deployment.  
-
-[start=2]
 . Set network tags `vMX-1` and `vMX-2` to identify vMX nodes as the primary and secondary hub, respectively. To set network tags in the Meraki dashboard, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags^].
 
-. Configure your branch sites as Meraki Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting^]
+. Configure your branch sites as Meraki Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting^].
 
 
 === Launch the Quick Start

@@ -14,15 +14,14 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * A highly available architecture that spans two Availability Zones.*
 * A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
-* An internet gateway connecting the VPC to the internet.
-* A public route table to specify routing rules for outbound internet traffic.
-* In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances, configured as hubs in the Meraki VPN network.
-* In the private subnets, elastic network interfaces to enable traffic routing from all subnets in the Availability Zone to Transit Gateway.
-* A transit gateway route table associated with the VPC for routing rules to Transit Gateway.
-* Transit Gateway attached to the VPC, enabling connectivity to attached workload VPCs in other AWS Regions.
-* CloudWatch to invoke AWS Lambda if a Meraki vMX instance fails.
+* An internet gateway that connects the VPC to the internet.
+* A VPC route table associated with the public subnets to specify routing rules for outbound internet traffic.
+* In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances.
+* In the private subnets, elastic network interfaces to enable traffic routing from all subnets in the Availability Zone to AWS Transit Gateway.
+* AWS Transit Gateway attached to the VPC, enabling connectivity to attached workload VPCs in other AWS Regions.
+* A transit gateway route table associated with the VPC for routing rules to AWS Transit Gateway.
+* Amazon CloudWatch to collect logs of vMX instance performance.
 * AWS Lambda to monitor the state of the vMX instances. If an instance fails, AWS Lambda updates route tables to point to a healthy instance and logs the event in CloudWatch.
-* CloudWatch to collect logs of vMX instance performance.
 * AWS Secrets Manager to store a Meraki API key. AWS Lambda uses the API key to access the Meraki dashboard when updating route tables.
 
 [.small]#*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#

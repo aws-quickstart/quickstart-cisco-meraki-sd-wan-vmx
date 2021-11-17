@@ -41,6 +41,7 @@ Metadata:
           - QSS3BucketName
           - QSS3KeyPrefix
           - QSS3BucketRegion
+          - KeyPairName
     ParameterLabels:
       KeyPairName:
         default: Key pair name
@@ -113,22 +114,22 @@ Parameters:
   vMX1Token:
     Description: Onboarding token for the first vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
-    Default: Token must match the one on the Meraki dashboard.
+    Default: change_to_match_the_token_from_meraki_dashboard
   vMX2Token:
     Description: Onboarding token for the second vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^]. 
     Type: String
-    Default: Token must match the one on the Meraki dashboard.
+    Default: change_to_match_the_token_from_meraki_dashboard
   AZ1PublicSubnetID:
-    Description: ID of the public subnet in Availability Zone 1 of the existing VPC (e.g., subnet-z0376dab).
+    Description: ID of the public subnet in Availability Zone 1 of the existing VPC (e.g., `subnet-z0376dab`).
     Type: "AWS::EC2::Subnet::Id"
   AZ2PublicSubnetID:
-    Description: ID of the public subnet in Availability Zone 2 of the existing VPC (e.g., subnet-a29c3d84).
+    Description: ID of the public subnet in Availability Zone 2 of the existing VPC (e.g., `subnet-a29c3d84`).
     Type: "AWS::EC2::Subnet::Id"
   VPCID:
-    Description: ID of the existing VPC for deployment (e.g., vpc-0343606e).
+    Description: ID of the existing VPC for deployment (e.g., `vpc-0343606e`).
     Type: AWS::EC2::VPC::Id
   VPCRouteTableID:
-    Description: ID of the existing VPC main route table (e.g., rt-0343606e).
+    Description: ID of the existing VPC main route table (e.g., `rt-0343606e`).
     Type: String
   QSS3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'

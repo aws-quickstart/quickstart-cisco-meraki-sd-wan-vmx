@@ -1,4 +1,3 @@
-This guide provides instructions for deploying the {partner-product-short-name} Quick Start reference architecture on the AWS Cloud. It helps IT architects, network administrators, and DevOps engineers use AWS Transit Gateway to connect branches with AWS workloads across multiple AWS Regions.
-
+This guide provides instructions for deploying the {partner-product-short-name} Quick Start reference architecture on the AWS Cloud. It helps organizations connect software-defined wide area networks (SD-WANs) to applications running on AWS.
 
 
