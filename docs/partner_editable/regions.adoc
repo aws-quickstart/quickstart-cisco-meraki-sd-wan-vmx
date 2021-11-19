@@ -1,5 +1,3 @@
-This Quick Start supports the following Regions:
-
-* All regions (except Gov Cloud)
+This Quick Start supports all AWS Regions except AWS GovCloud (US).
 
 //Full list: https://docs.aws.amazon.com/general/latest/gr/rande.html

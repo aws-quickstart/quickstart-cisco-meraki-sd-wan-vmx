@@ -17,4 +17,4 @@ For more information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/U
 
 == Troubleshooting
 
-For vMX related troubleshooting, please refer to the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[Meraki Documentation^] 
+For troubleshooting, see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)^]. 

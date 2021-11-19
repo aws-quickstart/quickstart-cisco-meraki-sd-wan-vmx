@@ -5,7 +5,7 @@ project:
   - us-west-1
   s3_regional_buckets: true
   shorten_stack_name: True
-  
+
 tests:
   default:
     template: ./templates/quickstart-cisco-meraki-sdwan-vmx-entrypoint-new-vpc.template.yaml

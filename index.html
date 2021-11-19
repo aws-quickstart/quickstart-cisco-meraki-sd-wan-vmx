@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.15">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>Cisco Meraki Virtual MX on the AWS Cloud</title>
 <style>
 
@@ -839,12 +839,13 @@ p.footer-text a{color:#d7d8d8}
 <li><a href="#_deployment_steps">Deployment steps</a>
 <ul class="sectlevel2">
 <li><a href="#_confirm_your_aws_account_configuration">Confirm your AWS account configuration</a></li>
-<li><a href="#_meraki_dashboard_configuration">Meraki Dashboard Configuration</a></li>
+<li><a href="#_subscribe_to_the_meraki_vmx_ami">Subscribe to the Meraki vMX AMI</a></li>
+<li><a href="#_meraki_dashboard_configuration">Meraki dashboard configuration</a></li>
 <li><a href="#_launch_the_quick_start">Launch the Quick Start</a></li>
 </ul>
 </li>
-<li><a href="#_post_deployment_steps">Post Deployment Steps</a></li>
-<li><a href="#_vmx_ha_architecture">vMX HA Architecture</a></li>
+<li><a href="#_postdeployment_steps">Postdeployment steps</a></li>
+<li><a href="#_vmx_ha_architecture">vMX HA architecture</a></li>
 <li><a href="#_best_practices_for_using_meraki_vmx_on_aws">Best practices for using Meraki vMX on AWS</a></li>
 <li><a href="#_faq">FAQ</a></li>
 <li><a href="#_troubleshooting">Troubleshooting</a></li>
@@ -873,7 +874,7 @@ p.footer-text a{color:#d7d8d8}
 </div>
 </div>
 <div class="paragraph text-center">
-<p><strong>August 2021</strong><br>
+<p><strong>November 2021</strong><br>
 <em>Simarbir Singh, Cisco Systems Inc.</em><br>
 <em>Muffadal Quettawala, AWS Partner team</em><br>
 <em>Shivansh Singh, AWS Integration &amp; Automation team</em></p>
@@ -900,25 +901,7 @@ report bugs, or submit feature ideas for this Quick Start.
 <h2 id="_overview">Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This guide provides instructions and the Quick Start reference architecture for creating an active/active HA deployment of a redundant pair of Cisco Meraki&#8217;s virtual MXs with AWS Transit Gateway integration on the AWS Cloud. This requires you to have at least two vMX licences. This is not a warm spare configuration.</p>
-</div>
-<div class="paragraph">
-<p>Customers are increasingly moving towards multi-region deployments in the cloud and require a more dynamic way to connect from branch sites to cloud workloads across different regions.
-While this can be done using VPC peering across different regions and using static routes, this can quickly become cumbersome and difficult to manage. By using Transit Gateway we can connect multiple workload VPCs via a central hub, this simplifies the network and puts an
-end to the complexity of managing the different VPC-VPC peering relationships. AWS Transit Gateway routes all traffic to and from each VPC and you have one place to manage and monitor it all. The Transit Gateway acts as a cloud router and each new connection is only made once making the network streamlined and scalable.</p>
-</div>
-<div class="paragraph">
-<p>The AWS Cloud infrastructure is global, and is built around Regions and Availability Zones. A Region is a separate geographic area where you can place AWS instances and data. For a current map of AWS Regions, see AWS Global Infrastructure on the AWS website.
-When you launch this Quick Start, you can choose the AWS Region where you would like to deploy your vMX instances in. Each Region includes multiple Availability Zones, which are isolated locations with one or more discrete data centers—each with redundant power,
-networking and connectivity, housed in separate facilities. Each vMX is deployed in a different Availability Zone to achieve a highly available architecture.</p>
-</div>
-<div class="paragraph">
-<p>The methodology of operation is to deploy a new SD-WAN VPC with the two vMXs deployed in different availability zones in the same region.
-In-addition a Transit Gateway is deployed to extend connectivity to workload resources across different regions. The SD-WAN VPC is attached to the TGW via a VPC attachment and customers can leverage their existing workflows to connect their workload VPCs to the Transit Gateway.
-On the Meraki, each vMX is configured as either a primary or a secondary Hub to the branch sites and statically advertises all of the subnets available in Amazon AWS into AutoVPN. An Amazon AWS Lambda script is used to monitor the state of the vMX instances and update the SD-WAN VPC and the Transit Gateway route tables for the AutoVPN routes with the appropriate vMX as the next hop.</p>
-</div>
-<div class="paragraph">
-<p>This Quick Start is designed for multiple audiences, including IT architects, network administrators, DevOps professionals and existing Meraki customers leveraging the virtual MX in the cloud.</p>
+<p>This guide provides instructions for deploying the Meraki vMX Quick Start reference architecture on the AWS Cloud. It helps organizations connect software-defined wide area networks (SD-WANs) to applications running on AWS.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -938,16 +921,7 @@ Amazon may share user-deployment information with the AWS Partner that collabora
 <h2 id="_cisco_meraki_virtual_mx_on_aws">Cisco Meraki Virtual MX on AWS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Virtual MX (vMX) is a virtual instance of a Meraki security and
-SD-WAN appliance dedicated specifically to providing the simple
-configuration benefits of site-to-site Auto VPN for organizations
-running or migrating IT services to public or private cloud
-environments. An Auto VPN tunnel to a vMX is like having a direct
-Ethernet connection to a private data center.</p>
-</div>
-<div class="paragraph">
-<p>vMX functions like a VPN concentrator and includes SD-WAN functionality like other MX devices.
-For instructions on how the vMX works on AWS, please see the Meraki documentation for <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">vMX Setup Guide for AWS</a></p>
+<p>Meraki vMX is a virtualized security and SD-WAN network appliance. This Quick Start deploys vMX as a node to extend the common policy, segmentation, and security of SD-WAN environments at scale. The deployment includes an active-active pair of redundant vMX appliances in a highly available configuration. With <a href="https://aws.amazon.com/transit-gateway/?whats-new-cards.sort-by=item.additionalFields.postDateTime&amp;whats-new-cards.sort-order=desc" target="_blank" rel="noopener">AWS Transit Gateway</a> as a cloud router, connectivity can be scaled across virtual private clouds (VPCs) with workloads in multiple AWS Regions. You can configure, monitor, and maintain all of your Meraki devices from a single Meraki dashboard.</p>
 </div>
 </div>
 </div>
@@ -982,13 +956,10 @@ After you deploy the Quick Start, create <a href="https://docs.aws.amazon.com/aw
 <h2 id="_software_licenses">Software licenses</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The vMX is listed as a Bring Your Own License (BYOL) offer on the AWS Market place. A Meraki vMX – small, medium or large enterprise cloud-management license is required and is available in 1, 3, or 5 year durations.
-If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License" target="_blank" rel="noopener">vMX licenses are added</a>.
-If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki <a href="https://locatr.cloudapps.cisco.com/WWChannels/LOCATR/openBasicSearch.do" target="_blank" rel="noopener">reseller</a> or sales representative</p>
+<p>This deployment is not a warm spare configuration. It requires you to have at least two vMX licenses. If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional licenses are added. For more information, see <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License" target="_blank" rel="noopener">Add Another License</a>. If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki <a href="https://locatr.cloudapps.cisco.com/WWChannels/LOCATR/openBasicSearch.do" target="_blank" rel="noopener">reseller</a> or sales representative.</p>
 </div>
 <div class="paragraph">
-<p>The Quick Start requires a subscription to the Amazon Machine Image (AMI) for Meraki vMX, which is available from <a href="https://aws.amazon.com/marketplace/pp/B08LZWG4TT" target="_blank" rel="noopener">AWS Marketplace</a>.
-Additional pricing, terms, and conditions may apply. For instructions, see the deployment section.</p>
+<p>The Quick Start requires a subscription to the Amazon Machine Image (AMI) for Meraki vMX, which is available from <a href="https://aws.amazon.com/marketplace/pp/B08LZWG4TT" target="_blank" rel="noopener">AWS Marketplace</a>. For more information, see <a href="#_deployment_steps">Deployment steps</a>, later in this guide.</p>
 </div>
 </div>
 </div>
@@ -1002,7 +973,7 @@ AWS Cloud.</p>
 </div>
 <div id="architecture1" class="imageblock">
 <div class="content">
-<img src="images/architecture_diagram.png" alt="Architecture">
+<img src="images/cisco-meraki-sd-wan-vmx-architecture-diagram.png" alt="Architecture">
 </div>
 <div class="title">Figure 1. Quick Start architecture for Meraki vMX on AWS</div>
 </div>
@@ -1012,64 +983,42 @@ AWS Cloud.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>A highly available architecture that spans across two Availability Zones.</p>
+<p>A highly available architecture that spans two Availability Zones.*</p>
 </li>
 <li>
-<p>A SDWAN VPC is deployed and configured with public internet access, according to AWS
-best practices, to provide you with your own virtual network on AWS.</p>
+<p>A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*</p>
 </li>
 <li>
-<p>An internet gateway for public internet access.</p>
+<p>An internet gateway that connects the VPC to the internet.</p>
 </li>
 <li>
-<p>An AWS Secret Manager secret to store the Meraki API Key.</p>
+<p>A VPC route table associated with the public subnets to specify routing rules for outbound internet traffic.</p>
 </li>
 <li>
-<p>Two vMX Appliances. The vMXs are deployed as hubs and onboarded to their corresponding Meraki networks based on the authentication token entered during deployment.</p>
+<p>In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances.</p>
 </li>
 <li>
-<p>In the SDWAN VPC, a public route table is deployed.</p>
+<p>In the private subnets, elastic network interfaces to enable traffic routing from all subnets in the Availability Zone to AWS Transit Gateway.</p>
 </li>
 <li>
-<p>In the public subnets:</p>
-<div class="ulist">
-<ul>
+<p>AWS Transit Gateway attached to the VPC, enabling connectivity to attached workload VPCs in other AWS Regions.</p>
+</li>
 <li>
-<p>vMX instances with an internet routable IP are deployed.</p>
+<p>A transit gateway route table associated with the VPC for routing rules to AWS Transit Gateway.</p>
+</li>
+<li>
+<p>Amazon CloudWatch to collect logs of vMX instance performance.</p>
+</li>
+<li>
+<p>AWS Lambda to monitor the state of the vMX instances. If an instance fails, AWS Lambda updates route tables to point to a healthy instance and logs the event in CloudWatch.</p>
+</li>
+<li>
+<p>AWS Secrets Manager to store a Meraki API key. AWS Lambda uses the API key to access the Meraki dashboard when updating route tables.</p>
 </li>
 </ul>
 </div>
-</li>
-<li>
-<p>A periodic Cloudwatch event that is scheduled at fixed time intervals of 1, 10 or 60 mins</p>
-</li>
-<li>
-<p>In addition a Transit Gateway is deployed to extend connectivity for the Meraki SDWAN fabric to workload resources across different regions.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>The SDWAN VPC is attached as a VPC attachment to the Transit Gateway.</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>A lambda function is deployed to monitor the state of the vMXs and update the VPC and the TGW route tables to handle failover and failback.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>The lambda fetches the auto-vpn routes destined for the vMX hubs from the Meraki Dashboard and updates the SDWAN VPC route table and the TGW route tables.</p>
-</li>
-<li>
-<p>Monitors the state of the vMX instances and incase of a failure moves all the appropriate routes to the active vMX.</p>
-</li>
-<li>
-<p>The lambda uses the Meraki API key stored in AWS Secret manager to connect to the Meraki Dashboard and is triggered based on the Cloudwatch events defined above.</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
+<div class="paragraph">
+<p><span class="small">*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.</span></p>
 </div>
 </div>
 </div>
@@ -1085,8 +1034,7 @@ and <a href="https://aws.amazon.com/training/" target="_blank" rel="noopener">AW
 deploy, and operate your infrastructure and applications on the AWS Cloud.</p>
 </div>
 <div class="paragraph">
-<p>This Quick Start also assumes familiarity with the Meraki Dashboard and the vMX offering on AWS. For more information, please refer to the
-<a href="https://documentation.meraki.com/Getting_Started" target="_blank" rel="noopener">Meraki Getting Started Guide</a> and the <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">vMX setup guide for AWS</a></p>
+<p>This Quick Start also assumes familiarity with the <a href="https://documentation.meraki.com/Getting_Started" target="_blank" rel="noopener">Meraki dashboard</a> and setting up a vMX appliance on AWS. For more information, see <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">vMX setup guide for Amazon Web Services (AWS)</a>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1141,19 +1089,19 @@ deploy, and operate your infrastructure and applications on the AWS Cloud.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Lambda Functions</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Lambda functions</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Secrets Manager Secret</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Secrets Manager secrets</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AWS CloudWatch Event Rules</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CloudWatch event rules</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">EC2 Key Pair</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EC2 key pairs</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
 </tr>
 </tbody>
@@ -1194,10 +1142,10 @@ Certain Regions are available on an opt-in basis. For more information, see <a h
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Deploy Meraki vMX into a new VPC</strong>. This option builds a new AWS environment consisting of the SDWAN VPC, subnets, Internet Gateways, security groups, and other infrastructure components. It then deploys Meraki vMX into this new VPC along with the lambda function.</p>
+<p><strong>Deploy Meraki vMX into a new VPC</strong>. This option builds a new AWS environment consisting of the VPC, subnets, Internet Gateways, security groups, and other infrastructure components. It then deploys Meraki vMX into this new VPC along with the AWS Lambda function.</p>
 </li>
 <li>
-<p><strong>Deploy Meraki vMX into an existing VPC</strong>. This option deploys Meraki vMX into an existing VPC along with the lambda function.</p>
+<p><strong>Deploy Meraki vMX into an existing VPC</strong>. This option deploys Meraki vMX into an existing VPC along with the AWS Lambda function.</p>
 </li>
 </ul>
 </div>
@@ -1207,7 +1155,7 @@ Certain Regions are available on an opt-in basis. For more information, see <a h
 <div class="ulist">
 <ul>
 <li>
-<p>Subscribe the the vMX offering from the <a href="https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&amp;ref_=beagle&amp;applicationId=AWSMPContessa" target="_blank" rel="noopener">AWS Marketplace</a></p>
+<p>Subscribe to Cisco Meraki vMX on <a href="https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk?sr=0-1&amp;ref_=beagle&amp;applicationId=AWSMPContessa">AMI Marketplace</a>.</p>
 </li>
 </ul>
 </div>
@@ -1217,13 +1165,15 @@ Certain Regions are available on an opt-in basis. For more information, see <a h
 <div class="ulist">
 <ul>
 <li>
-<p>Enable API access to your Meraki Organization by following the steps mentioned <a href="https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API" target="_blank" rel="noopener">here</a></p>
+<p>Enable API access to your Meraki organization. For more information, see <a href="https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API" target="_blank" rel="noopener">Cisco Meraki Dashboard API</a>.</p>
 </li>
 <li>
-<p>Add vMX licenses to the Meraki dashboard by following the steps mentioned <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License" target="_blank" rel="noopener">here</a>.
-For more information on how to obtain licenses, refer to <a href="#_licenses">Software Licenses</a></p>
+<p>Add vMX licenses to the Meraki dashboard. For more information, see <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/License_Info_Page_-_Co-Termination_License_Model#Add_Another_License" target="_blank" rel="noopener">Add Another License</a>.</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>For more information on how to obtain licenses, see <a href="#_licenses">Software licenses</a>, previously in this guide.</p>
 </div>
 </div>
 </div>
@@ -1246,55 +1196,43 @@ For more information on how to obtain licenses, refer to <a href="#_licenses">So
 </div>
 </div>
 <div class="sect2">
-<h3 id="_meraki_dashboard_configuration">Meraki Dashboard Configuration</h3>
+<h3 id="_subscribe_to_the_meraki_vmx_ami">Subscribe to the Meraki vMX AMI</h3>
+<div class="paragraph">
+<p>This Quick Start requires a subscription to the AMI for Meraki vMX in AWS Marketplace.</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>Deploy the vMX Nodes</strong>: First we need to generate two vMX nodes inside the Meraki dashboard which we will then instantiate on AWS.  Begin by creating two new Security Appliance network in your organization. This <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Creating_and_Deleting_Dashboard_Networks" target="_blank" rel="noopener">guide</a> will walk you through creating a new network in the Meraki Dashboard.
-Once you have created the network and added the appropriate license you will be able to deploy a new vMX instance in your network by navigating to Security &amp; SD-WAN &gt; Appliance Status and clicking on the relevant 'Add VMX' button on your Meraki dashboard.</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/vmx_license.png" alt="vMX License">
-</div>
-</div>
-<div class="paragraph">
-<p>For more details, please refer to the <strong>Meraki Dashboard Configuration</strong> section of the <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration" target="_blank" rel="noopener">vMX Setup Guide for AWS</a></p>
-</div>
+<p>Sign in to your AWS account.</p>
 </li>
 <li>
-<p><strong>Deploy Network Tags</strong>: For identifying the appropriate vMXs as primary and seconday hubs, we leverage Network Tags. vMX-1 is is used to identify the primary hub and vMX-2 tag is used to identify the secondary Hub. To set the network tags for the vMXs, navigate to the Organization &gt; Overview page and select the checkbox next to the network that you wish to tag. Below is a snippet of the Meraki Dashboard Overview page:</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/vmx_tags.png" alt="vMX Tags">
-</div>
-</div>
-<div class="paragraph">
-<p>For more information about Network Tags, please refer to the <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags" target="_blank" rel="noopener">Manage Tags Guide</a></p>
-</div>
+<p>Open the page for the <a href="https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk" target="_blank" rel="noopener">Cisco Meraki vMX AMI in AWS Marketplace</a>, and then choose <strong>Continue to Subscribe</strong>.</p>
 </li>
 <li>
-<p><strong>Branch Site Configuration</strong>: Navigate to Security &amp; SD-WAN &gt; Configure &gt; Site-to-Site page on the Meraki Dashboard and configure your branch sites as autovpn spokes with the vMXs as the primary and secondary hubs.</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/meraki_autovpn.png" alt="AutoVPN Configuration">
-</div>
-</div>
-<div class="paragraph">
-<p>For more information, please refer to the <a href="https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting" target="_blank" rel="noopener">Meraki Auto VPN - Configuration and Troubleshooting Guide</a></p>
-</div>
+<p>Review the terms and conditions for software usage, and then choose <strong>Accept Terms</strong>.<br>
+A confirmation page loads, and an email confirmation is sent to the account owner. For detailed subscription instructions, see the <a href="https://aws.amazon.com/marketplace/help/200799470" target="_blank" rel="noopener">AWS Marketplace documentation</a>.</p>
 </li>
 <li>
-<p><strong>Generate Authentication Tokens for the vMXs</strong>: After you&#8217;ve added the new vMX to your network, navigate to Security &amp; SD-WAN &gt; Appliance status and select “Generate authentication token” to generate the token. This token would be used as an input parameter for the Quickstart templates.</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/vmx_auth_token.png" alt="vMX Auth Token">
+<p>When the subscription process is complete, exit out of AWS Marketplace without further action. <strong>Do not</strong> provision the software from AWS Marketplace—the Quick Start deploys the AMI for you.</p>
+</li>
+</ol>
 </div>
 </div>
-<div class="imageblock">
-<div class="content">
-<img src="images/vmx_auth_token_2.png" alt="vMX Auth Token-2">
+<div class="sect2">
+<h3 id="_meraki_dashboard_configuration">Meraki dashboard configuration</h3>
+<div class="paragraph">
+<p>Before deploying the Quick Start, do the following:</p>
 </div>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Complete the instructions in the "Meraki Dashboard Configuration" section of the <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">vMX Setup Guide for Amazon Web Services (AWS)</a>. During configuration, you generate authentication tokens for the vMX appliances. Copy and save the tokens. You must enter them in the <code>vMX1Token</code> and <code>vMX2Token</code> parameters in the AWS CloudFormation console during Quick Start deployment.</p>
+</li>
+<li>
+<p>Set network tags <code>vMX-1</code> and <code>vMX-2</code> to identify vMX nodes as the primary and secondary hub, respectively. To set network tags in the Meraki dashboard, see <a href="https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags" target="_blank" rel="noopener">Manage Tags</a>.</p>
+</li>
+<li>
+<p>Configure your branch sites as Meraki Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see <a href="https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting" target="_blank" rel="noopener">Meraki Auto VPN - Configuration and Troubleshooting</a>.</p>
 </li>
 </ol>
 </div>
@@ -1315,12 +1253,12 @@ Once you have created the network and added the appropriate license you will be 
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_launch_permalink" target="_blank" rel="noopener">Deploy Meraki vMX into a SDWAN VPC on AWS</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_template_permalink" target="_blank" rel="noopener">View template</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/6aN9v?" target="_blank" rel="noopener">Deploy Meraki vMX into a VPC on AWS</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/BEEnM?" target="_blank" rel="noopener">View template</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_launch_permalink" target="_blank" rel="noopener">Deploy Meraki vMX into an existing SDWAN VPC on AWS</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_template_permalink" target="_blank" rel="noopener">View template</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/JnvKq?" target="_blank" rel="noopener">Deploy Meraki vMX into an existing VPC on AWS</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/Byq3z?" target="_blank" rel="noopener">View template</a></p></td>
 </tr>
 </tbody>
 </table>
@@ -1355,73 +1293,60 @@ Once you have created the network and added the appropriate license you will be 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_post_deployment_steps">Post Deployment Steps</h2>
+<h2 id="_postdeployment_steps">Postdeployment steps</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Post-Deployment, the addition of the workload VPCs as VPC attachments to the TransitGatewy and updating of the SD-WAN VPC route table for the workload subnets is required.
-Please, see below for the generic steps for a deployment using a single Transit Gateway and multiple workload VPCs within the same AWS account.</p>
+<p>After deployment, you must do the following:</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+<div class="ulist">
+<ul>
 <li>
-<p>Add the workload VPCs as VPC attachments to the TGW and associate with the TGW route table. Information and about creating Transit Gateway VPC attachments can be found <a href="https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html" target="_blank" rel="noopener">here</a></p>
+<p>Attach the workload VPCs to the transit gateway. For more information, see <a href="https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html" target="_blank" rel="noopener">Transit gateway attachments to a VPC</a>.</p>
 </li>
 <li>
-<p>Update VPC Route Tables. Information about VPC Route Tables can be found <a href="https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes" target="_blank" rel="noopener">here</a></p>
+<p>Update the VPC route table for the workload subnets. For more information, see <a href="https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes" target="_blank" rel="noopener">Add and remove routes from a route table</a>.</p>
 </li>
-</ol>
-</div>
-<div class="paragraph">
-<p>The above steps might not suffice or there might be additional steps that can be required based on your deployment and setup workflow.</p>
+</ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_vmx_ha_architecture">vMX HA Architecture</h2>
+<h2 id="_vmx_ha_architecture">vMX HA architecture</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The architecture is made fault tolerant by having two instances in different AZs. The lambda functions handles both an instance level failure by checking the EC2 instance state of the vMX and also software level failures by checking the
-vMX health state from the Meraki Dashboard. Incase of a vMX instance failure the lambda will detect the failure, log it to cloudwatch and also update the VPC and Transit Gateway routes to point to the healthy instance.
-For recovering a failed vMX instance, the following steps can be followed.</p>
+<p>The deployment architecture is fault tolerant with two vMX instances in different Availability Zones. An AWS Lambda function handles instance-level failures by checking the state of vMX EC2 instances. For software-level failures, it checks the vMX health state on the Meraki vMX dashboard. In the case of a vMX instance failure, the AWS Lambda function logs the error in CloudWatch and updates the VPC and transit gateway routes to point to a healthy instance.</p>
+</div>
+<div class="paragraph">
+<p><strong>To recover a failed Meraki vMX instance</strong></p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Login to the Meraki dashboard and generate a new Authentication token for the vMX instance. The steps to generate an Authentication token can be found under the <a href="#_deploy_steps">deployment steps</a> section</p>
+<p>Sign in to the <a href="https://dashboard.meraki.com/" target="_blank" rel="noopener">Meraki dashboard</a>.</p>
 </li>
 <li>
-<p>Deploy a new vMX stack</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Under Specify Stack details, specify the following parameters</p>
-<div class="olist lowerroman">
-<ol class="lowerroman" type="i">
-<li>
-<p>InstanceType: Choose the same Amazon EC2 instance type that was used before</p>
+<p>Generate a new authentication token for the failed instance. For more information, see step 4 in the <a href="#_meraki_dashboard_configuration">Meraki Dashboard Configuration</a> section, previously in this guide.</p>
 </li>
 <li>
-<p>KeyPairName: An existing EC2 KeyPair</p>
+<p>Deploy a new vMX stack. For deployment links, see <a href="#_launch_the_quick_start">Launch the Quick Start</a>, previously in this guide. On the <strong>Specify Stack Details</strong> page in the CloudFormation console, specify the following parameters:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>InstanceType</code>. Choose the same Amazon EC2 instance type that you specified during the previous deployment.</p>
 </li>
 <li>
-<p>SubnetID: Select the SubnetID the vMX will be deployed in</p>
+<p><code>KeyPairName</code>. Enter the name of an existing EC2 key pair.</p>
 </li>
 <li>
-<p>vMXNetworkTag: Specify the Network Tag associated with the instance on the Meraki dashboard</p>
+<p><code>SubnetID</code>. Select the SubnetID to deploy the vMX instance.</p>
 </li>
 <li>
-<p>vMXToken: Enter the new Authentication token generated from the Meraki dashboard</p>
-</li>
-</ol>
-</div>
+<p><code>vMXNetworkTag</code>. Specify the network tag associated with the vMX instance on the Meraki dashboard.</p>
 </li>
 <li>
-<p>Review the stack information and choose Create stack</p>
-<div class="paragraph">
-<p>More information about Cloudformation, can be found <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/" target="_blank" rel="noopener">here</a></p>
-</div>
+<p><code>vMXToken</code>. Enter the new authentication token generated from the Meraki dashboard.</p>
 </li>
-</ol>
+</ul>
 </div>
 </li>
 </ol>
@@ -1432,7 +1357,7 @@ For recovering a failed vMX instance, the following steps can be followed.</p>
 <h2 id="_best_practices_for_using_meraki_vmx_on_aws">Best practices for using Meraki vMX on AWS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For vMX deployment best practices please refer to the <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration" target="_blank" rel="noopener">vMX Setup Guide for AWS</a></p>
+<p>For best practices, see <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)#Meraki%20Dashboard%20Configuration" target="_blank" rel="noopener">vMX Setup Guide for Amazon Web Services (AWS)</a>.</p>
 </div>
 </div>
 </div>
@@ -1472,7 +1397,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <h2 id="_troubleshooting">Troubleshooting</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For vMX related troubleshooting, please refer to the <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">Meraki Documentation</a></p>
+<p>For troubleshooting, see <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)" target="_blank" rel="noopener">vMX Setup Guide for Amazon Web Services (AWS)</a>.</p>
 </div>
 </div>
 </div>
@@ -1517,46 +1442,46 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The Meraki Org ID to be used for this quickstart
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization ID
 (<code>MerakiOrgID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The Meraki Org ID to be used for this quickstart</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization ID.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The API Key for your Meraki Organization
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization API key
 (<code>MerakiAPIKey</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The API Key for your Meraki Organization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization API key.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to be deployed
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances
 (<code>NumberOfvMXs</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>2</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to be deployed.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to deploy.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX1
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authentication token, first vMX instance
 (<code>vMX1Token</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_to_match_the_token_from_meraki_dashboard</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token for the first vMX instance. You can obtain the token from the <a href="https://account.meraki.com/login/dashboard_login?go=%2F" target="_blank" rel="noopener">Meraki dashboard</a>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX2
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authentication token, second vMX instance
 (<code>vMX2Token</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_to_match_the_token_from_meraki_dashboard</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token for the second vMX instance. You can obtain the token from the <a href="https://account.meraki.com/login/dashboard_login?go=%2F" target="_blank" rel="noopener">Meraki dashboard</a>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network Tag for vMX1
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network tag, first vMX instance
 (<code>vMX1MerakiNetworkTag</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>vMX1</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Tag used to identify the Meraki vMX1 Network on the dashboard</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">On the Meraki dashboard, the vMX network tag for the first vMX instance.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network Tag for vMX2
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network tag, second vMX instance
 (<code>vMX2MerakiNetworkTag</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>vMX2</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Tag used to identify the Meraki vMX2 Network on the dashboard</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">On the Meraki dashboard, the vMX network tag for the second vMX instance.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1576,34 +1501,34 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Availability Zones to use for the subnets in the SDWAN VPC
+<td class="tableblock halign-left valign-top"><p class="tableblock">Availability Zones to use for the SD-WAN VPC subnets
 (<code>AvailabilityZones</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">List of Availability Zones to use for the subnets in the SDWAN VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of Availability Zones to use for the VPC subnets. Two Availability Zones are used for this deployment.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the SDWAN VPC
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the VPC
 (<code>VPCCIDR</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.249.0.0/16</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the SDWAN VPC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the SD-WAN VPC.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 1
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for public subnet 1
 (<code>AvailabilityZone1CIDR</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.249.0.0/24</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 1 located in Availability Zone 1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for public subnet 1, located in Availability Zone 1.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 2
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for public subnet 2
 (<code>AvailabilityZone2CIDR</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.249.1.0/24</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 2 located in Availability Zone 2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for public subnet 2, located in Availability Zone 2.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ASN to be used for the Amazon TGW
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transit gateway ASN
 (<code>AmazonSideASN</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ASN to be used for the Amazon TGW</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Autonomous System Number (ASN) for the transit gateway.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1623,15 +1548,15 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances
+<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type
 (<code>InstanceType</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>c5.large</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances. For recommended and supported instance types, see <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)">vMX Setup Guide for Amazon Web Services (AWS)</a>.</p></td>
 </tr>
 </tbody>
 </table>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Lambda configuration</caption>
+<caption class="title">Table 4. AWS Lambda configuration</caption>
 <colgroup>
 <col style="width: 16%;">
 <col style="width: 11%;">
@@ -1646,10 +1571,10 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">rate (frequency) for the CloudWatch Events
+<td class="tableblock halign-left valign-top"><p class="tableblock">CloudWatch Events rule rate
 (<code>LambdaRate</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>rate(10 minutes)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The rate (frequency) that determines when CloudWatch Events runs the rule that triggers the Lambda function to update the VPC and the TGW route tables.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How often the CloudWatch Events rule runs. The rule invokes AWS Lambda to update the VPC and transit gateway route tables.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1672,19 +1597,25 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 bucket name
 (<code>QSS3BucketName</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>aws-quickstart</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the S3 bucket for your copy of the Quick Start assets. Keep the default name unless you are customizing the template. Changing the name updates code references to point to a new Quick Start location. This name can include numbers, lowercase letters, uppercase letters, and hyphens, but do not start or end with a hyphen (-). See <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 key prefix
 (<code>QSS3KeyPrefix</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>quickstart-cisco-meraki-sd-wan-vmx/</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3 key prefix that is used to simulate a directory for your copy of the Quick Start assets. Keep the default prefix unless you are customizing the template. Changing this prefix updates code references to point to a new Quick Start location. This prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash. See <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html" class="bare">https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html</a> and <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 bucket Region
 (<code>QSS3BucketRegion</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>us-east-1</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. Keep the default Region unless you are customizing the template. Changing this Region updates code references to point to a new Quick Start location. When using your own bucket, specify the Region. See <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key pair name
+(<code>KeyPairName</code>)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EC2 key pair name.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1707,46 +1638,46 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The Meraki Org ID to be used for this quickstart
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization ID
 (<code>MerakiOrgID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The Meraki Org ID to be used for this quickstart</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization ID.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The API Key for your Meraki Organization
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization API key
 (<code>MerakiAPIKey</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The API Key for your Meraki Organization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki organization API key.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to be deployed
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances
 (<code>NumberOfvMXs</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>2</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to be deployed.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of vMX instances to deploy.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-1
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authentication token, first vMX instance
 (<code>vMX1Token</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_to_match_the_token_from_meraki_dashboard</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-1. This can be obtained from the Meraki dashboard.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token for the first vMX instance. You can obtain the token from the <a href="https://account.meraki.com/login/dashboard_login?go=%2F" target="_blank" rel="noopener">Meraki dashboard</a>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-2
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authentication token, second vMX instance
 (<code>vMX2Token</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_to_match_the_token_from_meraki_dashboard</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token to be used for the vMX-2. This can be obtained from the Meraki dashboard.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Onboarding token for the second vMX instance. You can obtain the token from the <a href="https://account.meraki.com/login/dashboard_login?go=%2F" target="_blank" rel="noopener">Meraki dashboard</a>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network Tag for vMX1
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network tag, first vMX instance
 (<code>vMX1MerakiNetworkTag</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>vMX1</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Tag used to identify the Meraki vMX1 Network on the dashboard</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">On the Meraki dashboard, the vMX network tag for the first vMX instance.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network Tag for vMX2
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meraki network tag, second vMX instance
 (<code>vMX2MerakiNetworkTag</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>vMX2</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Tag used to identify the Meraki vMX2 Network on the dashboard</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">On the Meraki dashboard, the vMX network tag for the second vMX instance.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1769,31 +1700,31 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <td class="tableblock halign-left valign-top"><p class="tableblock">VPC ID
 (<code>VPCID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ID of your existing VPC for deployment (e.g., vpc-0343606e).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the existing VPC for deployment (e.g., <code>vpc-0343606e</code>).</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 1
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NO_LABEL</strong>
 (<code>AZ1PublicSubnetID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the public subnet in Availability Zone 1 of your existing VPC (e.g., subnet-z0376dab).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the public subnet in Availability Zone 1 of the existing VPC (e.g., <code>subnet-z0376dab</code>).</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CIDR block for the public subnet 2
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NO_LABEL</strong>
 (<code>AZ2PublicSubnetID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the public subnet in Availability Zone 2 of your existing VPC (e.g., subnet-a29c3d84).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the public subnet in Availability Zone 2 of the existing VPC (e.g., <code>subnet-a29c3d84</code>).</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ASN to be used for the Amazon TGW
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transit gateway ASN
 (<code>AmazonSideASN</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ASN to be used for the Amazon TGW</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Autonomous System Number (ASN) for the transit gateway.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Route table ID for existing SDWAN Route Table
+<td class="tableblock halign-left valign-top"><p class="tableblock">Existing VPC route table ID
 (<code>VPCRouteTableID</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ID of your existing VPC&#8217;s Main Route Table.  (e.g., rt-0343606e).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID of the existing VPC main route table (e.g., <code>rt-0343606e</code>).</p></td>
 </tr>
 </tbody>
 </table>
@@ -1813,15 +1744,15 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances
+<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type
 (<code>InstanceType</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>c5.large</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon EC2 instance type for the vMX instances. For recommended and supported instance types, see <a href="https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)">vMX Setup Guide for Amazon Web Services (AWS)</a>.</p></td>
 </tr>
 </tbody>
 </table>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 9. Lambda configuration</caption>
+<caption class="title">Table 9. AWS Lambda configuration</caption>
 <colgroup>
 <col style="width: 16%;">
 <col style="width: 11%;">
@@ -1836,10 +1767,10 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">rate (frequency) for the CloudWatch Events
+<td class="tableblock halign-left valign-top"><p class="tableblock">CloudWatch Events rule rate
 (<code>LambdaRate</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>rate(10 minutes)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The rate (frequency) that determines when CloudWatch Events runs the rule that triggers the Lambda function to update the VPC and the TGW route tables.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How often the CloudWatch Events rule runs. The rule invokes AWS Lambda to update the VPC and transit gateway route tables.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1862,19 +1793,25 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 bucket name
 (<code>QSS3BucketName</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>aws-quickstart</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the S3 bucket for your copy of the Quick Start assets. Keep the default name unless you are customizing the template. Changing the name updates code references to point to a new Quick Start location. This name can include numbers, lowercase letters, uppercase letters, and hyphens, but do not start or end with a hyphen (-). See <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 key prefix
 (<code>QSS3KeyPrefix</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>quickstart-cisco-meraki-sd-wan-vmx/</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3 key prefix that is used to simulate a directory for your copy of the Quick Start assets. Keep the default prefix unless you are customizing the template. Changing this prefix updates code references to point to a new Quick Start location. This prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash. See <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html" class="bare">https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html</a> and <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Quick Start S3 bucket Region
 (<code>QSS3BucketRegion</code>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>us-east-1</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. Keep the default Region unless you are customizing the template. Changing this Region updates code references to point to a new Quick Start location. When using your own bucket, specify the Region. See <a href="https://aws-quickstart.github.io/option1.html" class="bare">https://aws-quickstart.github.io/option1.html</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key pair name
+(<code>KeyPairName</code>)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>Requires input</em></strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EC2 key pair name.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1922,16 +1859,16 @@ and to share your customizations with others.</p>
 </div>
 <p class="footer-text">
 <!-- We can use document attributes: -->
-<!-- Generated with Asciidoctor v2.0.15. -->
+<!-- Generated with Asciidoctor v2.0.16. -->
 <a href="https://aws.amazon.com/privacy/">Privacy</a> | <a href="https://aws.amazon.com/terms/">Site terms</a> | &copy; 2021, Amazon Web Services, Inc. or its affiliates and Cisco Systems Inc.. All rights reserved.
 </p>
 </body>
 </html>
 <!--
 repo commit:
-0495c5b81631a1e23ec4f9e5ee2e56bef95455d0
+f7ac0c4deef70a2dcb18e9cbd8e9e5ff5c31e213
 
 submodule config:
  eea042d0b9c005d2549a71349e5f28b02c81af75 docs/boilerplate (heads/main)
- ffc7af4e59a09dbf52199a3ecf70f3805abeff48 submodules/quickstart-aws-vpc (v1.0-58-gffc7af4)
+ b7aefd089e944d77cdc2b083886cdc498d2a6ee4 submodules/quickstart-aws-vpc (v1.0-59-gb7aefd0)
 -->
