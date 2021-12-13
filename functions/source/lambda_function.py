@@ -76,7 +76,7 @@ def get_meraki_tagged_networks(dashboard, org_id, vmx_tag):
     organization_networks_response = dashboard.organizations.getOrganizationNetworks(
         org_id, total_pages='all'
     )
-    vmx_network = [x for x in organization_networks_response if str(vmx_tag).lower() in str(x['tags'])[1:-1]]
+    vmx_network = [x for x in organization_networks_response if str(vmx_tag) in str(x['tags'])[1:-1]]
 
     return vmx_network[0]['id']
 
@@ -163,14 +163,15 @@ def get_ec2_instance_id(instance_tag):
     instance_id = []
     logger.info('AWS EC2: Checking for vMX instances with instance tag {0}'.format(instance_tag))
     for i in instances['Reservations']:
+        instance_id.append(i['Instances'][0]['InstanceId'])
         if i['Instances'][0]['State']['Name'] == 'running':
-            instance_id.append(i['Instances'][0]['InstanceId'])
             logger.info('AWS EC2: Running vMX instance found with tag {0} and instance id {1}'.format(instance_tag, instance_id))
         else:
             logger.info('AWS EC2: Shutdown/Terminated vMX instance found with instance tag {0} and instance id {1}'.format(instance_tag, i['Instances'][0]['InstanceId']))
     if len(instance_id) > 1:
         logger.error('AWS EC2: More that one running instance with the same tag, please remove tag from stale/broken instance')
         logger.error('AWS EC2: The following instances {0}, were found with the tag {1}'.format(instance_id, instance_tag))
+        exit
     else:
         return instance_id[0]
 
