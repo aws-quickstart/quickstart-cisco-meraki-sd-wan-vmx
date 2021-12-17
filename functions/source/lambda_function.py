@@ -59,16 +59,26 @@ def get_all_vpn_routes(dashboard, org_id, vmx1_id, vmx2_id):
     vpn_routes_vmx1 = []
     vpn_routes_vmx2 = []
     for networks in org_vpn_status:
-        if networks['vpnMode'] == 'spoke' and networks['merakiVpnPeers'][0]['networkId'] == vmx1_id:
-            for subnets in networks['exportedSubnets']:
-                vpn_routes_vmx1.append(subnets.get('subnet'))
-    
-        elif networks['vpnMode'] == 'spoke' and networks['merakiVpnPeers'][0]['networkId'] == vmx2_id:
-            for subnets in networks['exportedSubnets']:
-                vpn_routes_vmx2.append(subnets.get('subnet'))
-        else:
-            logger.info('Meraki Dashboard: No routes found for vMX Hubs')
-            pass 
+        if networks['vpnMode'] == 'spoke': 
+            for peers in networks['merakiVpnPeers']:
+                if peers['networkId'] == vmx1_id or peers['networkId'] == vmx2_id:
+                    vpn_status = dashboard.appliance.getNetworkApplianceVpnSiteToSiteVpn(networks['networkId'])
+                    for i in vpn_status['hubs']:
+                        if i['hubId'] == vmx1_id:
+                            for subnets in networks['exportedSubnets']:
+                                logger.info('Meraki Dashboard: Found routes for vMX1 hub')
+                                vpn_routes_vmx1.append(subnets.get('subnet'))
+                                logger.info(vpn_routes_vmx1)
+                            break
+                        elif i['hubId'] == vmx2_id:
+                            for subnets in networks['exportedSubnets']:
+                                logger.info('Meraki Dashboard: Found routes for vMX2 hub')
+                                vpn_routes_vmx2.append(subnets.get('subnet'))
+                                logger.info(vpn_routes_vmx2)
+                            break
+                else:
+                    logger.info('Meraki Dashboard: No routes found for vMX Hubs')
+                    pass 
     return vpn_routes_vmx1, vpn_routes_vmx2
 
 def get_meraki_tagged_networks(dashboard, org_id, vmx_tag):
@@ -76,7 +86,7 @@ def get_meraki_tagged_networks(dashboard, org_id, vmx_tag):
     organization_networks_response = dashboard.organizations.getOrganizationNetworks(
         org_id, total_pages='all'
     )
-    vmx_network = [x for x in organization_networks_response if str(vmx_tag).lower() in str(x['tags'])[1:-1]]
+    vmx_network = [x for x in organization_networks_response if str(vmx_tag) in str(x['tags'])[1:-1]]
 
     return vmx_network[0]['id']
 
@@ -88,7 +98,7 @@ def check_vmx_status(dashboard, org_id, vmx_id, ec2_vmx_id):
     )
     logger.info('Checking vMX status for meraki org id {0} and ec2 instance id {1}'.format(vmx_id, ec2_vmx_id))
     meraki_vmx_status = [x for x in org_device_status if str(vmx_id) in str(x['networkId'])][0]['status']
-    ec2_vmx_status = ec2.describe_instance_status(InstanceIds=[ec2_vmx_id])
+    ec2_vmx_status = ec2.describe_instance_status(InstanceIds=[ec2_vmx_id], IncludeAllInstances=True)
     if meraki_vmx_status == 'online' and ec2_vmx_status['InstanceStatuses'][0]['InstanceState']['Name'] == 'running':
         vmx_status = 'online'
     else:
@@ -99,8 +109,10 @@ def check_vmx_status(dashboard, org_id, vmx_id, ec2_vmx_id):
 def update_tgw_rt(vpn_routes, tgw_rt_id, tgw_attach_id):
     region = os.environ['AWS_REGION']
     ec2 = boto3.client('ec2', region_name=region)
+    uniq_vpn_routes = list(set(vpn_routes))
+    logger.info("EC2 TGW Route Update {0}".format(uniq_vpn_routes))
     #Checking if the route already exsists, if so skip updating the TGW route table
-    for route in vpn_routes:
+    for route in uniq_vpn_routes:
         exsisting_route = ec2.search_transit_gateway_routes(
             TransitGatewayRouteTableId= tgw_rt_id,
             Filters=[
@@ -163,14 +175,15 @@ def get_ec2_instance_id(instance_tag):
     instance_id = []
     logger.info('AWS EC2: Checking for vMX instances with instance tag {0}'.format(instance_tag))
     for i in instances['Reservations']:
+        instance_id.append(i['Instances'][0]['InstanceId'])
         if i['Instances'][0]['State']['Name'] == 'running':
-            instance_id.append(i['Instances'][0]['InstanceId'])
             logger.info('AWS EC2: Running vMX instance found with tag {0} and instance id {1}'.format(instance_tag, instance_id))
         else:
             logger.info('AWS EC2: Shutdown/Terminated vMX instance found with instance tag {0} and instance id {1}'.format(instance_tag, i['Instances'][0]['InstanceId']))
     if len(instance_id) > 1:
         logger.error('AWS EC2: More that one running instance with the same tag, please remove tag from stale/broken instance')
         logger.error('AWS EC2: The following instances {0}, were found with the tag {1}'.format(instance_id, instance_tag))
+        exit
     else:
         return instance_id[0]
 
