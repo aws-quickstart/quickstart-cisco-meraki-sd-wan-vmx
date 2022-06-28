@@ -27,6 +27,9 @@ Metadata:
           - AZ2PublicSubnetID
           - AmazonSideASN
           - VPCRouteTableID
+          - TransitGateway
+          - TransitGatewaySDWANRouteTable
+          - TransitGatewayAttachment
       - Label:
           default: EC2 configuration
         Parameters:
@@ -77,6 +80,12 @@ Metadata:
         default: Quick Start S3 key prefix
       AmazonSideASN:
         default: Transit gateway ASN
+      TransitGateway:
+        default: Existing Transit Gateway ID
+      TransitGatewaySDWANRouteTable:
+        default: Existing Transit Gateway Route Table ID
+      TransitGatewayAttachment:
+        default: Existing Transit Gateway Attachment ID to vMX VPC
       LambdaRate:
         default: CloudWatch Events rule rate
 Parameters:
@@ -177,6 +186,18 @@ Parameters:
   AmazonSideASN:
     Description: Autonomous System Number (ASN) for the transit gateway.
     Type: String
+  TransitGateway:
+    Description: Existing Transit Gateway ID
+    Type: String
+    Default: ''
+  TransitGatewaySDWANRouteTable:
+    Description: Existing Transit Gateway Route Table ID
+    Type: String
+    Default: ''
+  TransitGatewayAttachment:
+    Description: Existing Transit Gateway Attachment ID to vMX VPC
+    Type: String
+    Default: ''
   LambdaRate:
     Description: How often the CloudWatch Events rule runs. The rule invokes AWS Lambda to update the VPC and transit gateway route tables.  
     Default: rate(10 minutes)
@@ -186,7 +207,9 @@ Parameters:
       - rate(60 minutes)
     Type: String
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  UsingDefaultBucket: !Equals 
+    - !Ref QSS3BucketName
+    - 'aws-quickstart'
   1vMXCondition: !Or
     - !Equals
       - !Ref 'NumberOfvMXs'
@@ -195,6 +218,8 @@ Conditions:
   2vMXCondition: !Equals
     - !Ref 'NumberOfvMXs'
     - '2'
+  UsingExistingTGW: !Not [!Equals [!Ref TransitGateway, '']]
+  CreateTGW: !Equals [!Ref TransitGateway, '']
 Resources:
   VMX1Stack:
     Condition: 1vMXCondition 
@@ -243,37 +268,63 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-tgw.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/quickstart-cisco-meraki-sdwan-vmx-${custom}tgw.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        AvailabilityZone1SubnetID:
-          Ref: AZ1PublicSubnetID
-        AvailabilityZone2SubnetID:
-          Ref: AZ2PublicSubnetID
-        VPCID:
-          Ref: VPCID
-        AmazonSideASN:
-          Ref: AmazonSideASN
-        QSS3BucketName:
-          Ref: QSS3BucketName
-        QSS3KeyPrefix:
-          Ref: QSS3KeyPrefix
-        QSS3BucketRegion:
-          Ref: QSS3BucketRegion
-        SDWANVPCRTID:
-          Ref: VPCRouteTableID
-        MerakiAPIKey:
-          Ref: MerakiAPIKey
-        MerakiOrgID:
-          Ref: MerakiOrgID
-        vMX1MerakiNetworkTag:
-          Ref: vMX1MerakiNetworkTag
-        vMX2MerakiNetworkTag:
-          Ref: vMX2MerakiNetworkTag
-        LambdaRate:
-          Ref: LambdaRate
-        
+            custom: !If [UsingExistingTGW, 'custom-', '']
+      Parameters: !If 
+        - UsingExistingTGW
+        - TransitGateway:
+            Ref: TransitGateway
+          TransitGatewaySDWANRouteTable:
+            Ref: TransitGatewaySDWANRouteTable
+          TransitGatewayAttachment:
+            Ref: TransitGatewayAttachment
+          QSS3BucketName:
+            Ref: QSS3BucketName
+          QSS3KeyPrefix:
+            Ref: QSS3KeyPrefix
+          QSS3BucketRegion:
+            Ref: QSS3BucketRegion
+          SDWANVPCRTID:
+            Ref: VPCRouteTableID
+          MerakiAPIKey:
+            Ref: MerakiAPIKey
+          MerakiOrgID:
+            Ref: MerakiOrgID
+          vMX1MerakiNetworkTag:
+            Ref: vMX1MerakiNetworkTag
+          vMX2MerakiNetworkTag:
+            Ref: vMX2MerakiNetworkTag
+          LambdaRate:
+            Ref: LambdaRate
+        - AvailabilityZone1SubnetID:
+            Ref: AZ1PublicSubnetID
+          AvailabilityZone2SubnetID:
+            Ref: AZ2PublicSubnetID
+          VPCID:
+            Ref: VPCID
+          AmazonSideASN:
+            Ref: AmazonSideASN
+          QSS3BucketName:
+            Ref: QSS3BucketName
+          QSS3KeyPrefix:
+            Ref: QSS3KeyPrefix
+          QSS3BucketRegion:
+            Ref: QSS3BucketRegion
+          SDWANVPCRTID:
+            Ref: VPCRouteTableID
+          MerakiAPIKey:
+            Ref: MerakiAPIKey
+          MerakiOrgID:
+            Ref: MerakiOrgID
+          vMX1MerakiNetworkTag:
+            Ref: vMX1MerakiNetworkTag
+          vMX2MerakiNetworkTag:
+            Ref: vMX2MerakiNetworkTag
+          LambdaRate:
+            Ref: LambdaRate
+
 Outputs:
   VPCID:
     Description: The ID of the deployed SD-WAN VPC.
