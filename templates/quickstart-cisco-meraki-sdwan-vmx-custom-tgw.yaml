@@ -57,9 +57,7 @@ Parameters:
     Type: String
 
 Conditions:
-  UsingDefaultBucket: !Equals 
-    - !Ref QSS3BucketName
-    - 'aws-quickstart'
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
 Resources:
   MerakiApiKey:
