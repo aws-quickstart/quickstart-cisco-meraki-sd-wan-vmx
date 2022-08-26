@@ -1,6 +1,6 @@
 // Change the following attributes.
 :quickstart-project-name: quickstart-cisco-meraki-sd-wan-vmx
-:partner-product-name: Cisco Meraki Virtual MX
+:partner-product-name: Cisco Meraki Virtual MX with AWS Transit Gateway
 // For the following attribute, if you have no short name, enter the same name as partner-product-name.
 :partner-product-short-name: Meraki vMX
 // If there's no partner, comment partner-company-name.
