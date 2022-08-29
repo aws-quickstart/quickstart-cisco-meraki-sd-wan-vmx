@@ -6,8 +6,8 @@
 (`MerakiOrgID`)|`**__Requires input__**`|Meraki organization ID.|Meraki organization API key
 (`MerakiAPIKey`)|`**__Requires input__**`|Meraki organization API key.|Number of vMX instances
 (`NumberOfvMXs`)|`2`|Number of vMX instances to deploy.|Authentication token, first vMX instance
-(`vMX1Token`)|`Token must match the one on the Meraki dashboard.`|Onboarding token for the first vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^].|Authentication token, second vMX instance
-(`vMX2Token`)|`Token must match the one on the Meraki dashboard.`|Onboarding token for the second vMX instance. You can obtain the token from the https://account.meraki.com/login/dashboard_login?go=%2F[Meraki dashboard^].|Meraki network tag, first vMX instance
+(`vMX1Token`)|`Token must match the one on the Meraki dashboard.`|Onboarding token for the first vMX instance. You can obtain the token from the Meraki dashboard at https://account.meraki.com/login/dashboard_login?go=%2F.|Authentication token, second vMX instance
+(`vMX2Token`)|`Token must match the one on the Meraki dashboard.`|Onboarding token for the second vMX instance. You can obtain the token from the Meraki dashboard at https://account.meraki.com/login/dashboard_login?go=%2F.|Meraki network tag, first vMX instance
 (`vMX1MerakiNetworkTag`)|`vMX1`|On the Meraki dashboard, the vMX network tag for the first vMX instance.|Meraki network tag, second vMX instance
 (`vMX2MerakiNetworkTag`)|`vMX2`|On the Meraki dashboard, the vMX network tag for the second vMX instance.
 |===
