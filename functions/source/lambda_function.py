@@ -46,7 +46,7 @@ def get_meraki_key():
         # Depending on whether the secret was a string or binary, only one of these fields will be populated
         if 'SecretString' in get_secret_value_response:
             text_secret_data = json.loads(get_secret_value_response['SecretString'])
-            merakiapikey = text_secret_data['MerakiApiKey']
+            merakiapikey = text_secret_data['MerakiApiKey'] #nosec
             return merakiapikey
         else:
             binary_secret_data = get_secret_value_response['SecretBinary']
