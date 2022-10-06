@@ -22,8 +22,10 @@ RT_ID = os.environ['RT_ID']
 VMX1_TAG = os.environ['vMX1Tag']
 VMX2_TAG = os.environ['vMX2Tag']
 
+# No security needed on seret_name as this is not a password but a refference to the secret in secrets manager.
+#
 def get_meraki_key():
-    secret_name = 'MerakiAPIKey'
+    secret_name = 'MerakiAPIKey' #nosec
     region = os.environ['AWS_REGION']
     session = boto3.session.Session()
     client = session.client(
@@ -46,7 +48,7 @@ def get_meraki_key():
         # Depending on whether the secret was a string or binary, only one of these fields will be populated
         if 'SecretString' in get_secret_value_response:
             text_secret_data = json.loads(get_secret_value_response['SecretString'])
-            merakiapikey = text_secret_data['merakiapikey']
+            merakiapikey = text_secret_data['MerakiApiKey']
             return merakiapikey
         else:
             binary_secret_data = get_secret_value_response['SecretBinary']
