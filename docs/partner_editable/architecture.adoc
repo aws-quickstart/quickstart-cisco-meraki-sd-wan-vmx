@@ -13,11 +13,10 @@ image::../images/cisco-meraki-sd-wan-vmx-architecture-diagram.png[Architecture]
 As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * A highly available architecture that spans two Availability Zones.*
-* A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
+* A VPC configured with public subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * An internet gateway that connects the VPC to the internet.
 * A VPC route table associated with the public subnets to specify routing rules for outbound internet traffic.
 * In the public subnets, Meraki vMX appliances on Amazon Elastic Compute Cloud (Amazon EC2) instances.
-* In the private subnets, elastic network interfaces to enable traffic routing from all subnets in the Availability Zone to AWS Transit Gateway.
 * AWS Transit Gateway attached to the VPC, enabling connectivity to attached workload VPCs in other AWS Regions.
 * A transit gateway route table associated with the VPC for routing rules to AWS Transit Gateway.
 * Amazon CloudWatch to collect logs of vMX instance performance.
