@@ -66,9 +66,9 @@ Metadata:
         default: Authentication token, second vMX instance
       VPCID:
         default: VPC ID
-      AvailabilityZone1CIDR:
+      AZ1PublicSubnetID:
         default: CIDR block for public subnet 1 
-      AvailabilityZone2CIDR:
+      AZ2PublicSubnetID:
         default: CIDR block for public subnet 2 
       VPCRouteTableID:
         default: Existing VPC route table ID
