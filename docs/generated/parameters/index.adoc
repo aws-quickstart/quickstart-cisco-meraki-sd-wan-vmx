@@ -1,6 +1,0 @@
-
-=== Launch into a new VPC
-include::quickstart-cisco-meraki-sdwan-vmx-entrypoint-new-vpc.template.adoc[]
-
-=== Launch into an existing VPC
-include::quickstart-cisco-meraki-sdwan-vmx-workload.template.adoc[]
