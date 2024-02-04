@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-   This template deploys a uses existing transit gateway in and VPC attachment for SD-WAN
+   This template deploys a uses existing transit gateway in and VPC attachment for SD-WAN (qs-1sc6b07qr)
 Parameters:
   TransitGateway:
     Description: Existing Transit Gateway ID
