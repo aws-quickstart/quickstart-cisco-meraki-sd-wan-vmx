@@ -1,3 +1,19 @@
 //Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
 
 == Predeployment steps
+
+=== Subscribe to the Meraki vMX AMI
+This deployment requires a subscription to the AMI for Meraki vMX in AWS Marketplace.
+
+. Sign in to your AWS account.
+. Open the page for the https://aws.amazon.com/marketplace/pp/prodview-o5hpcs2rygxnk[Cisco Meraki vMX AMI in AWS Marketplace], and then choose *Continue to Subscribe*.
+. Review the terms and conditions for software usage, and then choose *Accept Terms*. A confirmation page loads, and an email confirmation is sent to the account owner. For detailed subscription instructions, see the https://aws.amazon.com/marketplace/help/200799470[AWS Marketplace documentation].
+. When the subscription process is complete, exit out of AWS Marketplace without further action. Do not provision the software from AWS Marketplace—the Quick Start deploys the AMI for you.
+
+=== Meraki dashboard configuration
+Before deploying, do the following:
+
+[start=1]
+. Complete the instructions in the "Meraki Dashboard Configuration" section of the https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX Setup Guide for Amazon Web Services (AWS)]. During configuration, you generate authentication tokens for the vMX appliances. Copy and save the tokens. You must enter them in the vMX1Token and vMX2Token parameters in the AWS CloudFormation console during Quick Start deployment.
+. Set network tags vMX-1 and vMX-2 to identify vMX nodes as the primary and secondary hub, respectively. To set network tags in the Meraki dashboard, see https://documentation.meraki.com/General_Administration/Organizations_and_Networks/Organization_Menu/Manage_Tags[Manage Tags].
+. Configure your branch sites as Meraki Auto VPN spokes with the vMX instances as the primary and secondary hubs. For more information, see https://documentation.meraki.com/MX/Site-to-site_VPN/Meraki_Auto_VPN_-_Configuration_and_Troubleshooting[Meraki Auto VPN - Configuration and Troubleshooting].

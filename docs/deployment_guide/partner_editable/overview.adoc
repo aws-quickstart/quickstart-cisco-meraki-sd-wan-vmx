@@ -1,10 +1,5 @@
-This guide covers the information you need to deploy the {partner-product-name} Partner Solution in the AWS Cloud.
+This guide covers the information you need to deploy the {partner-product-name} Partner Solution in the AWS Cloud. It helps organizations connect software-defined wide area networks (SD-WANs) to applications running on AWS.
 
-// Fill in the info in <angle brackets> for use on the landing page only: 
-This Amazon Web Services (AWS) Partner Solution deploys [<product name>](<partner's marketing product page>) in the AWS Cloud so that <purpose>. This solution is for <target users> who want to <do what> so that <why>. For more information, refer to the [<product name> documentation](<URL>).
+=== Cisco Meraki Virtual MX on AWS
 
-// Deploying this solution does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations. [Uncomment this statement only for solutions that relate to compliance. We'll add the corresponding reference part to the landing page and get legal approval before publishing.]
-
-// For advanced information about the product, troubleshooting, or additional functionality, refer to the https://{partner-solution-github-org}.github.io/{partner-solution-project-name}/operational/index.html[Operational Guide^].
-
-// For information about using this Partner Solution for migrations, refer to the https://{partner-solution-github-org}.github.io/{partner-solution-project-name}/migration/index.html[Migration Guide^].
+Meraki vMX is a virtualized security and SD-WAN network appliance. This Quick Start deploys vMX as a node to extend the common policy, segmentation, and security of SD-WAN environments at scale. The deployment includes an active-active pair of redundant vMX appliances in a highly available configuration. With AWS Transit Gateway as a cloud router, connectivity can be scaled across virtual private clouds (VPCs) with workloads in multiple AWS Regions. You can configure, monitor, and maintain all of your Meraki devices from a single Meraki dashboard.

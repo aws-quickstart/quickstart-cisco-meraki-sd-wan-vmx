@@ -1,3 +1,7 @@
 // Include details about any licenses and how to sign up. Provide links as appropriate.
 
 There is no cost to use this Partner Solution, but you will be billed for any AWS services or resources that this Partner Solution deploys. For more information, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^].
+
+This deployment is not a warm spare configuration. It requires you to have at least two vMX licenses. If your organization has already reached its vMX license limit, you will be unable to create new vMX networks until a vMX network is deleted or additional licenses are added. For more information, see Add Another License. If you do not have access to a vMX license or require additional vMX licenses, please reach out to your Meraki reseller or sales representative.
+
+The deployment requires a subscription to the Amazon Machine Image (AMI) for Meraki vMX, which is available from https://aws.amazon.com/marketplace/pp/B08LZWG4TT[AWS Marketplace]. For more information, see Deployment steps, later in this guide.
