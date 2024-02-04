@@ -1,11 +1,11 @@
-// Add steps as necessary for accessing the software, post-configuration, and testing. Don’t include full usage instructions for your software, but add links to your product documentation for that information.
-//Should any sections not be applicable, remove them
+// Include any postdeployment steps here, such as steps necessary to test that the deployment was successful. If there are no postdeployment steps, leave this file empty.
 
 == Postdeployment steps
+
 After deployment, you must do the following:
 
-* Attach the workload VPCs to the transit gateway. For more information, see https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[Transit gateway attachments to a VPC^].
-* Update the VPC route table for the workload subnets. For more information, see https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[Add and remove routes from a route table^].
+* Attach the workload VPCs to the transit gateway. For more information, see https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpc-attachments.html[Transit gateway attachments to a VPC].
+* Update the VPC route table for the workload subnets. For more information, see https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html#AddRemoveRoutes[Add and remove routes from a route table].
 
 == vMX HA architecture
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.

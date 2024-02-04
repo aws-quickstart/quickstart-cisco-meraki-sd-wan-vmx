@@ -1,0 +1,5 @@
+This guide covers the information you need to deploy the {partner-product-name} Partner Solution in the AWS Cloud. It helps organizations connect software-defined wide area networks (SD-WANs) to applications running on AWS.
+
+=== Cisco Meraki Virtual MX on AWS
+
+Meraki vMX is a virtualized security and SD-WAN network appliance. This Quick Start deploys vMX as a node to extend the common policy, segmentation, and security of SD-WAN environments at scale. The deployment includes an active-active pair of redundant vMX appliances in a highly available configuration. With AWS Transit Gateway as a cloud router, connectivity can be scaled across virtual private clouds (VPCs) with workloads in multiple AWS Regions. You can configure, monitor, and maintain all of your Meraki devices from a single Meraki dashboard.

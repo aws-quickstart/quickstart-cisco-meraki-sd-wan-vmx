@@ -1,0 +1,17 @@
+:partner-solution-project-name: quickstart-cisco-meraki-sd-wan-vmx
+:partner-solution-github-org: aws-quickstart
+:partner-product-name: Cisco Meraki Virtual MX with AWS Transit Gateway
+:partner-product-short-name: Meraki VMX
+:partner-company-name: Cisco Systems Inc.
+:doc-month: February
+:doc-year: 2024
+:partner-contributors: Simarbir Singh, {partner-company-name}
+// :other-contributors: Akua Mansa, Trek10
+:aws-contributors: Muffadal Quettawala, AWS Partner team
+:aws-ia-contributors: Shivansh Singh, AWS Partner Integrations Engineering
+:deployment_time: 15 minutes
+:default_deployment_region: us-east-1
+// :private_repo:
+
+
+// For instructions on creating this deployment guide, refer to "Build your AWS Partner Solution documentation" (https://aws-ia-us-west-2.s3.us-west-2.amazonaws.com/docs/content/index.html#/).
