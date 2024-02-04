@@ -1,5 +1,0 @@
-// Replace the content in <>
-// Briefly describe the software. Use consistent and clear branding. 
-// Include the benefits of using the software on AWS, and provide details on usage scenarios.
-
-Meraki vMX is a virtualized security and SD-WAN network appliance. This Quick Start deploys vMX as a node to extend the common policy, segmentation, and security of SD-WAN environments at scale. The deployment includes an active-active pair of redundant vMX appliances in a highly available configuration. With https://aws.amazon.com/transit-gateway/?whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc[AWS Transit Gateway^] as a cloud router, connectivity can be scaled across virtual private clouds (VPCs) with workloads in multiple AWS Regions. You can configure, monitor, and maintain all of your Meraki devices from a single Meraki dashboard.

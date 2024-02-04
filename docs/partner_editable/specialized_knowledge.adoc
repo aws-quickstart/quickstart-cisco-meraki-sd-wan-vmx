@@ -1,6 +1,0 @@
-// Replace the content in <>
-// For example: “familiarity with basic concepts in networking, database operations, and data encryption” or “familiarity with <software>.”
-// Include links if helpful. 
-// You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
-
-This Quick Start also assumes familiarity with the https://documentation.meraki.com/Getting_Started[Meraki dashboard^] and setting up a vMX appliance on AWS. For more information, see https://documentation.meraki.com/MX/MX_Installation_Guides/vMX_Setup_Guide_for_Amazon_Web_Services_(AWS)[vMX setup guide for Amazon Web Services (AWS)^].
