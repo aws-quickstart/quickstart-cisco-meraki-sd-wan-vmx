@@ -118,7 +118,7 @@ Resources:
         Fn::GetAtt:
         - CopyObjectsRole
         - Arn
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 240
     Type: AWS::Lambda::Function
   CopyObjectsRole:
@@ -272,7 +272,7 @@ Resources:
         Fn::GetAtt:
         - S3CleanUpRole
         - Arn
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 240
     Type: AWS::Lambda::Function
   S3CleanUpRole:
