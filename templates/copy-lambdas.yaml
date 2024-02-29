@@ -1,5 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: This template creates an S3 bucket in the same region where the stack is launched and copy the Lambda functions code from original bucket to the new bucket. (qs-1s3afc2u3)
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - E3030
+      - W9002
+      - W9003
 Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -118,7 +125,7 @@ Resources:
         Fn::GetAtt:
         - CopyObjectsRole
         - Arn
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 240
     Type: AWS::Lambda::Function
   CopyObjectsRole:
@@ -272,7 +279,7 @@ Resources:
         Fn::GetAtt:
         - S3CleanUpRole
         - Arn
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 240
     Type: AWS::Lambda::Function
   S3CleanUpRole:

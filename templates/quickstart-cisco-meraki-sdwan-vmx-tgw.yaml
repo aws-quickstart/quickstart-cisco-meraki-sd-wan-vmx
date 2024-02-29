@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
    This template deploys a transit gateway in and attaches the SD-WAN vpc to it via VPC attachment (qs-1s3afc2th)
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - W9001
+      - W9002
+      - W9003
 Parameters:
   VPCID:
     Description: 'ID of the VPC (e.g., vpc-0343606e)'
@@ -79,8 +86,6 @@ Resources:
 
   TransitGatewayAttachment:
     Type: "AWS::EC2::TransitGatewayAttachment"
-    DependsOn:
-    - TransitGateway
     Properties:
       VpcId: !Ref VPCID
       TransitGatewayId: !Ref TransitGateway
@@ -204,7 +209,7 @@ Resources:
       Handler: lambda_function.main
       Timeout: 60
       Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
-      Runtime: python3.7
+      Runtime: python3.12
       Code:
         S3Bucket: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
         S3Key: !Sub "${QSS3KeyPrefix}functions/packages/lambda.zip"

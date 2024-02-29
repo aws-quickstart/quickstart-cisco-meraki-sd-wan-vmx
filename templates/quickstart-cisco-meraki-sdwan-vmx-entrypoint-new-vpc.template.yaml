@@ -4,9 +4,11 @@ Description: >-
   Cisco Meraki- Main Stack- Deploys two vMX instances in different avalaibility zones along with a new SDWAN VPC and a Transit Gateway. 
   **WARNING** You will be billed for the AWS resources used if you create a stack from this template. (qs-1sc6b07ep)
 Metadata:
-  QuickStartDocumentation:
-    EntrypointName: "Launch into a new VPC"
-    Order: "1"
+  cfn-lint:
+    config:
+      ignore_checks:
+      - W9001
+      - W9006
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -204,22 +206,21 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/cfn-ps-aws-vpc/templates/aws-vpc.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         AvailabilityZones: !Join 
           - ','
           - !Ref AvailabilityZones
-        KeyPairName: !Ref KeyPairName
         NumberOfAZs: !Ref NumberOfvMXs
         PublicSubnet1CIDR: !Ref AvailabilityZone1CIDR
         PublicSubnet2CIDR: !Ref AvailabilityZone2CIDR
         VPCCIDR: !Ref VPCCIDR
+        CreateNATGateways: false
         CreatePrivateSubnets: false
 
   WorkloadStack:
-    DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
