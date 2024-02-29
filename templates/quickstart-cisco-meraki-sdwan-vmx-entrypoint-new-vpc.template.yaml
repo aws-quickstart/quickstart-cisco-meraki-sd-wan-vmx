@@ -213,7 +213,6 @@ Resources:
         AvailabilityZones: !Join 
           - ','
           - !Ref AvailabilityZones
-        KeyPairName: !Ref KeyPairName
         NumberOfAZs: !Ref NumberOfvMXs
         PublicSubnet1CIDR: !Ref AvailabilityZone1CIDR
         PublicSubnet2CIDR: !Ref AvailabilityZone2CIDR
