@@ -2,3 +2,6 @@
 	path = docs/boilerplate
 	url = https://github.com/aws-ia/aws-ia-documentation-base-common.git
 	branch = main
+[submodule "submodules/cfn-ps-aws-vpc"]
+	path = submodules/cfn-ps-aws-vpc
+	branch = main

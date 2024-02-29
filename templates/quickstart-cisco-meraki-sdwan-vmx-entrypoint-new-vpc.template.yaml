@@ -206,7 +206,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/cfn-ps-aws-vpc/templates/aws-vpc.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -217,6 +217,7 @@ Resources:
         PublicSubnet1CIDR: !Ref AvailabilityZone1CIDR
         PublicSubnet2CIDR: !Ref AvailabilityZone2CIDR
         VPCCIDR: !Ref VPCCIDR
+        CreateNATGateways: false
         CreatePrivateSubnets: false
 
   WorkloadStack:
