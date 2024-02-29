@@ -157,7 +157,7 @@ Resources:
       Handler: lambda_function.main
       Timeout: 60
       Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
-      Runtime: python3.7
+      Runtime: python3.12
       Code:
         S3Bucket: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
         S3Key: !Sub "${QSS3KeyPrefix}functions/packages/lambda.zip"
