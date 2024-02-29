@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
    This template deploys a meraki vMX appliances in a VPC. (qs-1s3afc2ta)
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - W9001
+      - W9002
+      - W9003
 Parameters:
   InstanceType:
     Description: Amazon EC2 instance type for the vMX instances. For the recomended and supported instance types please refer to the vMX deployment guide. 
